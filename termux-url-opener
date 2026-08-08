@@ -18,6 +18,15 @@ scan_media() {
   fi
 }
 
+exit_termux() {
+  echo -e "\e[036m Termux bağlanır...\e[0m"
+  sleep 2
+  if command -v am >/dev/null 2>&1; then
+    am start -a android.intent.action.MAIN -c android.intent.category.HOME >/dev/null 2>&1
+  fi
+  exit 0
+}
+
 do_download() {
   mkdir -p "$tmp_dir" "$final_dir"
   yt-dlp "$@" -o "$tmp_dir/%(title)s.%(ext)s" "$url"
@@ -54,7 +63,7 @@ fi
 if [[ "$url" == *"shorts"* ]]; then
   echo -e "\e[036m Short aşkarlandı — avtomatik yüklənir...\e[0m"
   do_download
-  exit 0
+  exit_termux
 fi
 
 show_banner() {
@@ -108,21 +117,27 @@ while true; do
   case $choice in
     1)
       do_download -x --audio-format mp3 --audio-quality 0 -f 'bestaudio/best'
+      exit_termux
       ;;
     2)
       do_download -f 'best[height<=360]/best'
+      exit_termux
       ;;
     3)
       do_download -f 'best[height<=480]/best'
+      exit_termux
       ;;
     4)
       do_download -f 'best[height<=720]/best'
+      exit_termux
       ;;
     5)
       do_download -f 'best[height<=1080]/best'
+      exit_termux
       ;;
     6)
       do_download -f 'best[height<=2160]/best'
+      exit_termux
       ;;
     7)
       echo -e "\e[032m DownloaderOG-dan çıxıldı. Sağ olun!\e[0m"
@@ -134,6 +149,7 @@ while true; do
       ;;
     *)
       do_download -f 'best[height<=2160]/best'
+      exit_termux
       ;;
   esac
   break

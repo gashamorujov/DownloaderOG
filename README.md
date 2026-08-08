@@ -30,6 +30,8 @@ platformanın dəstəyi avtomatik yenilənir və yükləmə sürəti maksimumdur
 - Fayllar **MediaStore/MediaScanner** (`termux-media-scan`) ilə sistemə
   qeydiyyata alınır — şəkillər Qalereyada, MP3/audio fayllar musiqi
   pleyerlərində avtomatik görünür
+- Yükləmə tamamlandıqdan sonra avtomatik **Termux-dan çıxış** (ana ekrana
+  qayıdış, əlavə əməliyyat tələb olunmur)
 - `GASHAM` ASCII başlığı ilə professional terminal interfeysi
 - Bir dəfəlik quraşdırma — ikinci dəfə konfiqurasiya tələb olunmur
 
@@ -113,6 +115,8 @@ Telefonda istənilən videonu/musiqini açın:
 ```
 
 `A` yazdıqda məlumat (About) göstərilir və yenidən seçim menyusuna qayıdılır.
+Yükləmə başa çatdıqda proqram bir neçə saniyə mesajı göstərir və avtomatik
+olarak Termux-dan çıxır — əlavə "Enter" və ya başqa əməliyyat tələb olunmur.
 
 Əl ilə test üçün link skriptə birbaşa da verilə bilər:
 
