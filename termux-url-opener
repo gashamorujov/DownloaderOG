@@ -19,10 +19,11 @@ scan_media() {
 }
 
 exit_termux() {
-  echo -e "\e[036m Termux bağlanır...\e[0m"
+  echo -e "\e[036m Yükləmə tamamlandı — Termux bağlanır...\e[0m"
   sleep 2
   if command -v am >/dev/null 2>&1; then
     am start -a android.intent.action.MAIN -c android.intent.category.HOME >/dev/null 2>&1
+    am force-stop com.termux >/dev/null 2>&1
   fi
   exit 0
 }
