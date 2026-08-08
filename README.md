@@ -69,7 +69,13 @@ Quraşdırıcı avtomatik olaraq:
 - `python` quraşdırır
 - `yt-dlp` quraşdırır/yeniləyir
 - `/storage/emulated/0/DownloaderOG` qovluğunu yaradır
-- `termux-url-opener` skriptini quraşdırır (Share inteqrasiyası)
+- `~/bin/` qovluğunu yaradır
+- `~/bin/termux-url-opener` faylını quraşdırır və icra icazəsi verir (Share inteqrasiyası)
+- `~/.termux/termux-url-opener` ünvanını da yeniləyir (müasir Termux üçün)
+
+`~/bin/termux-url-opener` artıq mövcuddursa, köhnəsi `termux-url-opener.bak`
+kimi backup edilir və yeni versiya ilə avtomatik yenilənir — `install.sh`
+hər işlədiləndə bunu özü edir.
 
 ## 6. Storage icazəsinin verilməsi
 
@@ -104,14 +110,17 @@ Telefonda istənilən videonu/musiqini açın:
 Əl ilə test üçün link skriptə birbaşa da verilə bilər:
 
 ```bash
+bash ~/bin/termux-url-opener "https://www.youtube.com/watch?v=..."
 bash ~/.termux/termux-url-opener "https://www.youtube.com/watch?v=..."
 ```
 
 ## 8. Share sisteminin qurulması
 
-Quraşdırma zamanı skript avtomatik olaraq
-`~/.termux/termux-url-opener` ünvanına kopyalanır — Termux paylaşılan linki
-avtomatik bu skriptə ötürür. Share inteqrasiyası işləmirsə:
+Quraşdırma zamanı skript avtomatik olaraq `~/bin/termux-url-opener` ünvanına
+kopyalanır və icra icazəsi verilir — Termux paylaşılan linki avtomatik bu
+skriptə ötürür, skript isə URL-i birbaşa DownloaderOG proqramına çatdırır.
+Müasir Termux versiyaları üçün `~/.termux/termux-url-opener` da sinxron
+saxlanılır. Share inteqrasiyası işləmirsə və ya yeniləmək istəyirsinizsə:
 
 ```bash
 bash install.sh

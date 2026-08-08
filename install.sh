@@ -3,6 +3,8 @@
 # GASHAM DOWNLOADEROG — Termux quraşdırıcısı
 # İşləmə məntiqi: Termux-YTD2.0 üslubu
 
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
+
 echo -e "\e[035m[*] Paketlər yenilənir...\e[0m"
 apt update -y && apt upgrade -y
 
@@ -23,13 +25,23 @@ python -m pip install -U yt-dlp
 echo -e "\e[036m[*] DownloaderOG qovluğu yaradılır...\e[0m"
 mkdir -p /storage/emulated/0/DownloaderOG 2>/dev/null || mkdir -p "$HOME/storage/shared/DownloaderOG"
 
-echo -e "\e[032m[*] termux-url-opener quraşdırılır...\e[0m"
+echo -e "\e[032m[*] ~/bin qovluğu yaradılır...\e[0m"
+mkdir -p "$HOME/bin"
+
+echo -e "\e[032m[*] termux-url-opener quraşdırılır (~/bin/)...\e[0m"
+if [ -f "$HOME/bin/termux-url-opener" ]; then
+  cp "$HOME/bin/termux-url-opener" "$HOME/bin/termux-url-opener.bak"
+  echo -e "\e[033m[!] Köhnə ~/bin/termux-url-opener backup edildi: termux-url-opener.bak\e[0m"
+fi
+cp "$SCRIPT_DIR/termux-url-opener" "$HOME/bin/termux-url-opener"
+chmod +x "$HOME/bin/termux-url-opener"
+
+echo -e "\e[032m[*] termux-url-opener yenilənir (~/.termux/, müasir Termux üçün)...\e[0m"
 mkdir -p "$HOME/.termux"
 if [ -f "$HOME/.termux/termux-url-opener" ]; then
   cp "$HOME/.termux/termux-url-opener" "$HOME/.termux/termux-url-opener.bak"
-  echo -e "\e[033m[!] Köhnə termux-url-opener backup edildi: termux-url-opener.bak\e[0m"
+  echo -e "\e[033m[!] Köhnə ~/.termux/termux-url-opener backup edildi: termux-url-opener.bak\e[0m"
 fi
-SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 cp "$SCRIPT_DIR/termux-url-opener" "$HOME/.termux/termux-url-opener"
 chmod +x "$HOME/.termux/termux-url-opener"
 
