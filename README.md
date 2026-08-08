@@ -1,40 +1,38 @@
 # GASHAM DownloaderOG
 
-Termux üçün universal media yükləyici. YouTube, TikTok, Instagram, Facebook,
-X/Twitter, Reddit, Vimeo, Dailymotion və daha yüzlərlə platformadan link
-vasitəsilə video (MP4) və musiqi (MP3) yükləyin — hamısı bir əmrlə, bir dəfəlik
-quruluşla.
+Termux üçün universal media yükləyici — Termux-YTD2.0 işləmə məntiqi ilə.
+YouTube, TikTok, Instagram, Facebook, X/Twitter, Reddit, Vimeo, Dailymotion və
+yt-dlp-nin dəstəklədiyi yüzlərlə platformadan video və musiqi yükləyin —
+yalnız **2 kliklə**: *Share → Termux → keyfiyyət seçimi*.
 
 ---
 
 ## 1. Layihə haqqında
 
-DownloaderOG yt-dlp yükləmə mühərriki üzərində qurulmuş Python proqramıdır.
-Android Termux mühitində işləyir və aşağıdakıları təmin edir:
+GASHAM DownloaderOG yüngül və sürətli bir Termux alətidir. Telefonda videonu
+açıb **Paylaş (Share)** düyməsinə basdıqdan sonra **Termux** seçirsiniz və
+ekranda açılan menyudan keyfiyyəti qeyd edirsiniz — video/musiqi avtomatik
+yüklənir. YouTube **Shorts** paylaşdıqda isə menyu göstərilmədən birbaşa
+avtomatik yüklənir.
 
-- Telefondan **Share → Termux** ilə linkin avtomatik qəbulu
-- Orijinal başlıqla avtomatik fayl adlandırılması
-- Real format/keyfiyyət siyahısı və təxmini fayl ölçüləri
-- Progress bar ilə canlı yükləmə göstəricisi
-- `GASHAM` animasiyalı terminal başlığı
-- Bir dəfəlik avtomatik quraşdırma (dependencies, storage, share)
+Yükləmə mühərriki olaraq **yt-dlp** istifadə olunur — ona görə yüzlərlə
+platformanın dəstəyi avtomatik yenilənir və yükləmə sürəti maksimumdur.
 
 ## 2. Əsas xüsusiyyətlər
 
-- MP4 bölməsi: yalnız mövcud keyfiyyətlər (144p → 4K), ölçü ilə
-- MP3 bölməsi: MP4-ün davamı olan avtomatik nömrələmə (64–320 kbps)
-- Yalnız seçim nömrəsini yazaraq yükləmə
-- Yanlış seçimdə xəta mesajı və yenidən seçim imkanı
-- Yükləmə: faiz, yüklənən/ümumi ölçü, sürət, qalan vaxt
-- Fayl adı orijinal media başlığından götürülür, eyni ad olduqda `(1)`, `(2)` əlavə olunur
-- Yükləmə bitdikdən sonra avtomatik çıxış (əlavə Enter tələb olunmur)
-- Təhlükəsiz URL və fayl adı emalı, shell injection-dən qorunma
+- Share → Termux ilə avtomatik link qəbulu
+- YouTube Shorts üçün bir kliklə avtomatik yükləmə
+- Keyfiyyət seçimi: **Music MP3**, **360p**, **480p**, **720p**, **1080p**, **2160p**
+- Canlı yükləmə prosesi (yt-dlp progress bar)
+- Orijinal video başlığı ilə fayl adlandırma (`%(title)s.%(ext)s`)
+- `GASHAM` başlığı ilə professional terminal interfeysi
+- Bir dəfəlik quraşdırma — ikinci dəfə konfiqurasiya tələb olunmur
 
 ## 3. Dəstəklənən platformalar
 
-yt-dlp mühərriki sayəsində yüzlərlə platforma avtomatik dəstəklənir:
+yt-dlp extractor sistemi sayəsində avtomatik:
 
-- YouTube
+- YouTube (video + Shorts)
 - TikTok
 - Instagram
 - Facebook
@@ -42,10 +40,7 @@ yt-dlp mühərriki sayəsində yüzlərlə platforma avtomatik dəstəklənir:
 - Reddit
 - Vimeo
 - Dailymotion
-- və yt-dlp extractor sisteminin dəstəklədiyi digər platformalar
-
-Platforma siyahısı əl ilə məhdudlaşdırılmır — yt-dlp yeniləndikcə yeni
-platformalar avtomatik əlavə olunur.
+- və yt-dlp-nin dəstəklədiyi digər yüzlərlə platforma
 
 > ⚖️ Proqram yalnız qanuni olaraq yükləməyə icazəniz olan və ya müəllif
 > hüquqlarını pozmayan məzmun üçün nəzərdə tutulub.
@@ -53,14 +48,7 @@ platformalar avtomatik əlavə olunur.
 ## 4. Termux quraşdırılması
 
 1. Termux-u quraşdırın ([F-Droid](https://f-droid.org/) və ya rəsmi kanaldan).
-2. Termux-u açın və ilkin paketlər yenilənsin (ilk açılışda `pkg update` avtomatik təklif olunur).
-3. Storage icazəsi verin:
-
-```bash
-termux-setup-storage
-```
-
-4. Layihəni klonlayın:
+2. Termux-u açın və klonlayın:
 
 ```bash
 pkg update -y && pkg install -y git
@@ -76,79 +64,62 @@ bash install.sh
 
 Quraşdırıcı avtomatik olaraq:
 
-- Termux paketlərini yoxlayır/yeniləyir
-- `python`, `ffmpeg`, `git`, `termux-api` paketlərini quraşdırır
-- Python dependency-lərini (yt-dlp) quraşdırır
-- Storage icazəsini yoxlayır və `DownloaderOG` qovluğunu yaradır
-- `downloaderog` və `gasham` əmrlərini qeydiyyata alır
-- `termux-url-opener` vasitəsilə Android Share inteqrasiyasını qurur
-- Konfiqurasiya faylını hazırlayır
-
-İkinci dəfə quraşdırma tələb olunmur — proqram hazırdır.
+- Paketləri yeniləyir (`apt update && apt upgrade`)
+- Storage icazəsi istəyir (`termux-setup-storage`)
+- `python` quraşdırır
+- `yt-dlp` quraşdırır/yeniləyir
+- `/storage/emulated/0/DownloaderOG` qovluğunu yaradır
+- `termux-url-opener` skriptini quraşdırır (Share inteqrasiyası)
 
 ## 6. Storage icazəsinin verilməsi
-
-Termux-da bir dəfə icazə verin:
 
 ```bash
 termux-setup-storage
 ```
 
-Android-də açılan pəncərədə **Allow / İcazə ver** düyməsini basın. İcazə
-verilməyibsə, proqram bunu aşkar göstərir və eyni əmri təklif edir.
+Android-də açılan pəncərədə **Allow / İcazə ver** düyməsini basın. Quraşdırıcı
+bunu avtomatik istəyir, lakin istənilən vaxt əl ilə də edə bilərsiniz.
 
 ## 7. İstifadə qaydası
 
-```bash
-downloaderog
-```
+Telefonda istənilən videonu/musiqini açın:
 
-Proqram linki soruşacaq. Linki yapışdırın və Enter basın. Siyahıdan MP4 və ya
-MP3 seçiminin nömrəsini yazın:
+1. **Share (Paylaş)** düyməsinə basın
+2. Menyudan **Termux** seçin
+3. Ekranda `GASHAM DownloaderOG` menyusu açılır
+4. İstədiyiniz seçimin nömrəsini yazın və Enter basın
 
 ```text
-MP4
-  1. 144p — 3 MB
-  2. 360p — 10 MB
-  3. 1080p — 70 MB
-
-MP3
-  4. MP3 — 128 kbps — 4 MB
-  5. MP3 — 320 kbps — 10 MB
-
-Seçiminizi daxil edin:
+╠═▶ 1. Music MP3♫
+╠═▶ 2. Video 360p
+╠═▶ 3. Video 480p
+╠═▶ 4. Video 720p
+╠═▶ 5. Video 1080p
+╠═▶ 6. Video 2160p
+╠═▶ 7. Exit DownloaderOG
+╠═▶ A. About
+╚═:➤
 ```
 
-Link birbaşa da verilə bilər:
+Əl ilə test üçün link skriptə birbaşa da verilə bilər:
 
 ```bash
-downloaderog --url "https://www.youtube.com/watch?v=..."
+bash ~/.termux/termux-url-opener "https://www.youtube.com/watch?v=..."
 ```
-
-`gasham` əmri də eyni proqramı işə salır.
 
 ## 8. Share sisteminin qurulması
 
-Quraşdırma zamanı `termux-url-opener` faylı avtomatik qurulur. İstifadə:
-
-1. Telefonda YouTube/TikTok/Instagram-da videonu açın
-2. **Share (Paylaş)** düyməsini basın
-3. Menyudan **Termux** seçin
-4. DownloaderOG avtomatik işə düşür və seçim menyusunu göstərir
-
-Qeyd: Termux tamamilə bağlı olduqda Android sistem səviyyəsində avtomatik link
-qəbulu bütün cihazlarda mümkün olmur. Bunun üçün Share menyusunda Termux seçin
-— Termux yalnız bu zaman açılır və linki qəbul edir. Paylaşılan link həmişə
-`termux-url-opener` vasitəsilə proqrama ötürülür.
-
-Share inteqrasiyasını yenidən qurmaq üçün:
+Quraşdırma zamanı skript avtomatik olaraq
+`~/.termux/termux-url-opener` ünvanına kopyalanır — Termux paylaşılan linki
+avtomatik bu skriptə ötürür. Share inteqrasiyası işləmirsə:
 
 ```bash
-bash scripts/setup-share.sh
+bash install.sh
 ```
 
-Əlavə rahatlıq üçün Termux:Widget quraşdırıb ana ekrana `downloaderog`
-qısayolu əlavə edə bilərsiniz (`~/.shortcuts/downloaderog.sh` avtomatik yaradılır).
+Qeyd: Termux tamamilə bağlı olduqda, Share menyusunda **Termux** seçildiyi
+zaman Termux açılır və linki qəbul edir — bu, Android-in standart Share
+mexanizminin ən real və stabil həllidir.
 
 ## 9. Faylların harada saxlanıldığı
 
@@ -158,25 +129,27 @@ Bütün yüklənmiş fayllar:
 /storage/emulated/0/DownloaderOG
 ```
 
-qovluğunda saxlanılır (Fallback: `~/storage/shared/DownloaderOG` və ya
-`~/DownloaderOG`). Fayl adları video/musiqinin orijinal başlığına uyğun olur və
-Android/Linux üçün təhlükəli simvollar avtomatik təmizlənir. Eyni adlı fayl
-mövcuddursa, `(1)`, `(2)` şəkilçisi əlavə olunur — heç bir fayl silinmir.
+qovluğunda saxlanılır (Fallback: `~/storage/shared/DownloaderOG`). Fayl adları
+video/musiqinin orijinal başlığına uyğun olur, məsələn:
+`GASHAM - Example Video 2026.mp4`.
 
-Yükləmə qovluğunu dəyişmək üçün `~/.config/downloaderog/config.json` faylında
-`download_dir` dəyərini redaktə edin (məsələn: `"/storage/emulated/0/Music"`).
+Yükləmə qovluğunu dəyişmək üçün `~/.termux/termux-url-opener` faylının
+əvvəlindəki `fpath` dəyərini redaktə edin:
+
+```bash
+fpath='/storage/emulated/0/Music/%(title)s.%(ext)s'
+```
 
 ## 10. Problemlərin həlli
 
 | Problem | Həll |
 | --- | --- |
-| Storage icazəsi yoxdur | `termux-setup-storage` işlədin və icazəni təsdiqləyin |
-| "Link dəstəklənmir" | Linkin tam və düzgün olduğunu yoxlayın, başqa video sınayın |
-| "Video əldə edilə bilmədi" | İnternet bağlantısını yoxlayın, bir az sonra yenidən cəhd edin |
-| Privat video | Yükləməyə icazəniz olan ictimai video seçin |
-| Yükləmə yarımçıq qaldı | Proqram davam etdirməni dəstəkləyir — eyni seçimlə yenidən cəhd edin |
-| MP3 çevrilmə xətası | `pkg install -y ffmpeg` ilə FFmpeg-in qurulu olduğunu yoxlayın |
-| Paylaş menyusunda Termux görünmür | Termux-u yeniləyin və ya `bash scripts/setup-share.sh` işlədin |
+| "No such file or directory" (storage) | `termux-setup-storage` işlədin və icazəni təsdiqləyin |
+| Share menyusunda Termux görünmür | Termux-u yeniləyin, sonra `bash install.sh` işlədin |
+| yt-dlp köhnədir / platforma xətası | `python -m pip install -U yt-dlp` |
+| Link dəstəklənmir | Linkin tam və düzgün olduğunu yoxlayın |
+| İnternet xətası | Bağlantınızı yoxlayın, bir az sonra yenidən cəhd edin |
+| Shorts yüklənmir | Shorts linkinin `shorts` hissəsi olduğunu yoxlayın |
 
 ## 11. Yeniləmə
 
@@ -186,8 +159,7 @@ git pull
 bash install.sh
 ```
 
-`bash install.sh` yenidən işlədildikdə kod, dependency-lər və inteqrasiya
-avtomatik yenilənir.
+Skript yeniləndikdə `termux-url-opener` avtomatik yenidən quraşdırılır.
 
 ## 12. License
 

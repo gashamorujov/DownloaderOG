@@ -1,0 +1,87 @@
+#!/data/data/com.termux/files/usr/bin/bash
+
+# GASHAM DOWNLOADEROG
+# Termux üçün universal media yükləyici (YouTube, TikTok, Instagram, ...)
+# İşləmə məntiqi: Paylaş (Share) → Termux → Menyu → Avtomatik yükləmə
+
+# SETTINGS (istədiyiniz kimi dəyişə bilərsiniz)--------------
+fpath='/storage/emulated/0/DownloaderOG/%(title)s.%(ext)s'
+# -----------------------------------------------------------
+
+url="$1"
+if [[ -z "$url" ]]; then
+  printf "\e[033m Video/audio linkini daxil edin: \e[0m"
+  read -r url
+fi
+if [[ -z "$url" ]]; then
+  echo -e "\e[031m Link daxil edilməyib. Çıxılır.\e[0m"
+  exit 1
+fi
+
+# YouTube Shorts — avtomatik yükləmə (menyu göstərilmir)
+if [[ "$url" == *"shorts"* ]]; then
+  echo -e "\e[036m Short aşkarlandı — avtomatik yüklənir...\e[0m"
+  yt-dlp -o "$fpath" "$url"
+  exit
+fi
+
+echo -e "\e[031m   ____         _       ____       _   _         _       __  __  "
+echo -e "\e[031m  / ___|       / \     / ___|     | | | |       / \     |  \/  | "
+echo -e "\e[031m | |  _       / _ \    \___ \     | |_| |      / _ \    | |\/| | "
+echo -e "\e[031m | |_| |     / ___ \    ___) |    |  _  |     / ___ \   | |  | | "
+echo -e "\e[031m  \____|    /_/   \_\  |____/     |_| |_|    /_/   \_\  |_|  |_| "
+echo -e "\e[036m ==============================================================="
+echo -e "\e[036m == GASHAM DownloaderOG — Termux üçün universal media yükləyici =="
+echo -e "\e[036m == YouTube • TikTok • Instagram • Facebook • X • Reddit • Vimeo =="
+echo -e "\e[0m"
+echo -e "\e[036m╔════════════════════════════════════════════════════════════╗"
+echo -e "\e[032m║ ♚ Project Name : GASHAM DownloaderOG™                      ║"
+echo -e "\e[032m║ ♚ Author       : Gasham Orujov (gashamorujov)              ║"
+echo -e "\e[032m║ ♚ Github       : github.com/gashamorujov/DownloaderOG      ║"
+echo -e "\e[036m╠════════════════════════════════════════════════════════════╝"
+echo -e "\e[036m╠═▶ [𝗦𝗲𝗹𝗲𝗰𝘁 𝗔 𝗙𝗼𝗿𝗺𝗮𝘁]  ➳"
+echo -e "\e[032m╠═▶ 1. Music MP3♫"
+echo -e "\e[032m╠═▶ 2. Video 360p"
+echo -e "\e[032m╠═▶ 3. Video 480p"
+echo -e "\e[032m╠═▶ 4. Video 720p"
+echo -e "\e[032m╠═▶ 5. Video 1080p"
+echo -e "\e[032m╠═▶ 6. Video 2160p"
+echo -e "\e[032m╠═▶ 7. Exit DownloaderOG"
+echo -e "\e[032m╠═▶ A. About"
+printf "\e[032m ╚═:➤ \e[0m "
+read choice
+
+case $choice in
+  1)
+    yt-dlp -x --audio-format mp3 --audio-quality 0 -f 'bestaudio/best' -o "$fpath" "$url"
+    ;;
+  2)
+    yt-dlp -f 'best[height<=360]/best' -o "$fpath" "$url"
+    ;;
+  3)
+    yt-dlp -f 'best[height<=480]/best' -o "$fpath" "$url"
+    ;;
+  4)
+    yt-dlp -f 'best[height<=720]/best' -o "$fpath" "$url"
+    ;;
+  5)
+    yt-dlp -f 'best[height<=1080]/best' -o "$fpath" "$url"
+    ;;
+  6)
+    yt-dlp -f 'best[height<=2160]/best' -o "$fpath" "$url"
+    ;;
+  7)
+    echo -e "\e[032m DownloaderOG-dan çıxıldı. Sağ olun!\e[0m"
+    exit 0
+    ;;
+  A|a)
+    echo -e "\e[036m GASHAM DownloaderOG — telefonla Share (Paylaş) düyməsi ilə"
+    echo -e "\e[036m istənilən videonu/musiqini Termux vasitəsilə yükləyən universal"
+    echo -e "\e[036m media yükləyicisidir. yt-dlp mühərriki sayəsində YouTube, TikTok,"
+    echo -e "\e[036m Instagram, Facebook, X, Reddit, Vimeo və yüzlərlə platformanı"
+    echo -e "\e[036m dəstəkləyir. Daha çox məlumat: github.com/gashamorujov/DownloaderOG\e[0m"
+    ;;
+  *)
+    yt-dlp -f 'best[height<=2160]/best' -o "$fpath" "$url"
+    ;;
+esac
