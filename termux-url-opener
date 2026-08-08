@@ -13,6 +13,9 @@ scan_media() {
   if command -v termux-media-scan >/dev/null 2>&1; then
     termux-media-scan "$1" >/dev/null 2>&1
     echo -e "\e[036m[✓] MediaScanner: $(basename "$1") qeydiyyata alındı (Qalereya/pleyer)\e[0m"
+  elif command -v am >/dev/null 2>&1; then
+    am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d "file://$1" >/dev/null 2>&1
+    echo -e "\e[036m[✓] MediaScanner: $(basename "$1") qeydiyyata alındı (broadcast)\e[0m"
   else
     echo -e "\e[033m[!] Media qeydiyyatı üçün termux-api quraşdırın: pkg install termux-api\e[0m"
   fi
@@ -48,6 +51,7 @@ do_download() {
     echo -e "\e[032m[✓] Fayl kəsildi (cut): $final_dir/$moved\e[0m"
     scan_media "$final_dir/$moved"
   fi
+  return 0
 }
 
 url="$1"
@@ -63,8 +67,9 @@ fi
 # YouTube Shorts — avtomatik yükləmə (menyu göstərilmir)
 if [[ "$url" == *"shorts"* ]]; then
   echo -e "\e[036m Short aşkarlandı — avtomatik yüklənir...\e[0m"
-  do_download
-  exit_termux
+  if do_download; then
+    exit_termux
+  fi
 fi
 
 show_banner() {
@@ -117,28 +122,22 @@ while true; do
 
   case $choice in
     1)
-      do_download -x --audio-format mp3 --audio-quality 0 -f 'bestaudio/best'
-      exit_termux
+      do_download -x --audio-format mp3 --audio-quality 0 --embed-metadata -f 'bestaudio/best' && exit_termux
       ;;
     2)
-      do_download -f 'best[height<=360]/best'
-      exit_termux
+      do_download -f 'best[height<=360]/best' && exit_termux
       ;;
     3)
-      do_download -f 'best[height<=480]/best'
-      exit_termux
+      do_download -f 'best[height<=480]/best' && exit_termux
       ;;
     4)
-      do_download -f 'best[height<=720]/best'
-      exit_termux
+      do_download -f 'best[height<=720]/best' && exit_termux
       ;;
     5)
-      do_download -f 'best[height<=1080]/best'
-      exit_termux
+      do_download -f 'best[height<=1080]/best' && exit_termux
       ;;
     6)
-      do_download -f 'best[height<=2160]/best'
-      exit_termux
+      do_download -f 'best[height<=2160]/best' && exit_termux
       ;;
     7)
       echo -e "\e[032m DownloaderOG-dan çıxıldı. Sağ olun!\e[0m"
@@ -149,11 +148,9 @@ while true; do
       continue
       ;;
     *)
-      do_download -f 'best[height<=2160]/best'
-      exit_termux
+      do_download -f 'best[height<=2160]/best' && exit_termux
       ;;
   esac
-  break
 done
 
 exit 0

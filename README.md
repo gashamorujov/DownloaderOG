@@ -30,8 +30,10 @@ platformanın dəstəyi avtomatik yenilənir və yükləmə sürəti maksimumdur
 - Fayllar **MediaStore/MediaScanner** (`termux-media-scan`) ilə sistemə
   qeydiyyata alınır — şəkillər Qalereyada, MP3/audio fayllar musiqi
   pleyerlərində avtomatik görünür
-- Yükləmə tamamlandıqdan sonra avtomatik **Termux-dan çıxış** (ana ekrana
-  qayıdış, əlavə əməliyyat tələb olunmur)
+- MP3 fayllarına ID3 metadatası (başlıq/artist) yazılır və `.mp3` /
+  `audio/mpeg` kimi qeydiyyata alınır — musiqi pleyerləri avtomatik tanıyır
+- Yükləmə **uğurla** tamamlandıqda Termux tamamilə bağlanır; yükləmə
+  uğursuz olarsa Termux açıq qalır və menyuya qayıdılır
 - `GASHAM` ASCII başlığı ilə professional terminal interfeysi
 - Bir dəfəlik quraşdırma — ikinci dəfə konfiqurasiya tələb olunmur
 
@@ -115,8 +117,10 @@ Telefonda istənilən videonu/musiqini açın:
 ```
 
 `A` yazdıqda məlumat (About) göstərilir və yenidən seçim menyusuna qayıdılır.
-Yükləmə başa çatdıqda proqram bir neçə saniyə mesajı göstərir və avtomatik
-olarak Termux-dan çıxır — əlavə "Enter" və ya başqa əməliyyat tələb olunmur.
+Yükləmə **uğurla** başa çatdıqda proqram bir neçə saniyə mesajı göstərir və
+Termux tamamilə bağlanır — əlavə "Enter" və ya başqa əməliyyat tələb olunmur.
+Yükləmə xəta ilə bitsə, Termux bağlanmır — menyuya qayıdılır və yenidən cəhd
+etmək mümkündür.
 
 Əl ilə test üçün link skriptə birbaşa da verilə bilər:
 
@@ -154,8 +158,9 @@ video/musiqinin orijinal başlığına uyğun olur, məsələn:
 `GASHAM - Example Video 2026.mp4`.
 
 Yükləndikdən sonra fayl avtomatik olaraq MediaScanner vasitəsilə Android
-MediaStore-a qeydiyyata alınır — şəkillər **Qalereyada**, MP3/audio fayllar
-**musiqi pleyerlərində** görünür (yalnız fayl meneceri deyil).
+MediaStore-a qeydiyyata alınır — MP4 **Qalereyada**, MP3 (`.mp3` /
+`audio/mpeg`, ID3 metadata ilə) **musiqi pleyerlərində** görünür (yalnız fayl
+meneceri deyil). Qeydiyyat tamamlandıqdan sonra Termux bağlanır.
 
 Yükləmə əvvəlcə müvəqqəti qovluqda (`~/.cache/downloaderog`) aparılır;
 yükləmə tamamlandıqda fayl **cut (mv)** əmri ilə hədəf klasörə keçirilir və
