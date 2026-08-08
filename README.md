@@ -1,4 +1,4 @@
-# GASHAM DownloaderOG
+# GASHAM-MASDİ DownloaderOG
 
 Termux üçün universal media yükləyici — Termux-YTD2.0 işləmə məntiqi ilə.
 YouTube, TikTok, Instagram, Facebook, X/Twitter, Reddit, Vimeo, Dailymotion və
@@ -9,7 +9,7 @@ yalnız **2 kliklə**: *Share → Termux → keyfiyyət seçimi*.
 
 ## 1. Layihə haqqında
 
-GASHAM DownloaderOG yüngül və sürətli bir Termux alətidir. Telefonda videonu
+GASHAM-MASDİ DownloaderOG yüngül və sürətli bir Termux alətidir. Telefonda videonu
 açıb **Paylaş (Share)** düyməsinə basdıqdan sonra **Termux** seçirsiniz və
 ekranda açılan menyudan keyfiyyəti qeyd edirsiniz — video/musiqi avtomatik
 yüklənir. YouTube **Shorts** paylaşdıqda isə menyu göstərilmədən birbaşa
@@ -25,7 +25,9 @@ platformanın dəstəyi avtomatik yenilənir və yükləmə sürəti maksimumdur
 - Keyfiyyət seçimi: **Music MP3**, **360p**, **480p**, **720p**, **1080p**, **2160p**
 - Canlı yükləmə prosesi (yt-dlp progress bar)
 - Orijinal video başlığı ilə fayl adlandırma (`%(title)s.%(ext)s`)
-- `GASHAM` başlığı ilə professional terminal interfeysi
+- Yükləmə temp qovluqda aparılır, bitdikdə **cut (mv)** ilə birbaşa
+  `/storage/emulated/0/DownloaderOG` klasörünə keçirilir — əlavə yer tutmur
+- `GASHAM-MASDİ` başlığı ilə professional terminal interfeysi
 - Bir dəfəlik quraşdırma — ikinci dəfə konfiqurasiya tələb olunmur
 
 ## 3. Dəstəklənən platformalar
@@ -92,7 +94,7 @@ Telefonda istənilən videonu/musiqini açın:
 
 1. **Share (Paylaş)** düyməsinə basın
 2. Menyudan **Termux** seçin
-3. Ekranda `GASHAM DownloaderOG` menyusu açılır
+3. Ekranda `GASHAM-MASDİ DownloaderOG` menyusu açılır
 4. İstədiyiniz seçimin nömrəsini yazın və Enter basın
 
 ```text
@@ -106,6 +108,8 @@ Telefonda istənilən videonu/musiqini açın:
 ╠═▶ A. About
 ╚═:➤
 ```
+
+`A` yazdıqda məlumat (About) göstərilir və yenidən seçim menyusuna qayıdılır.
 
 Əl ilə test üçün link skriptə birbaşa da verilə bilər:
 
@@ -140,13 +144,17 @@ Bütün yüklənmiş fayllar:
 
 qovluğunda saxlanılır (Fallback: `~/storage/shared/DownloaderOG`). Fayl adları
 video/musiqinin orijinal başlığına uyğun olur, məsələn:
-`GASHAM - Example Video 2026.mp4`.
+`GASHAM-MASDİ - Example Video 2026.mp4`.
 
-Yükləmə qovluğunu dəyişmək üçün `~/.termux/termux-url-opener` faylının
-əvvəlindəki `fpath` dəyərini redaktə edin:
+Yükləmə əvvəlcə müvəqqəti qovluqda (`~/.cache/downloaderog`) aparılır;
+yükləmə tamamlandıqda fayl **cut (mv)** əmri ilə hədəf klasörə keçirilir və
+müvəqqəti qovluq boşalır — cihaz yaddaşında əlavə yer tutmur.
+
+Yükləmə klasörünü dəyişmək üçün `~/.termux/termux-url-opener` faylının
+əvvəlindəki `final_dir` dəyərini redaktə edin:
 
 ```bash
-fpath='/storage/emulated/0/Music/%(title)s.%(ext)s'
+final_dir='/storage/emulated/0/Music'
 ```
 
 ## 10. Problemlərin həlli
