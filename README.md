@@ -1,4 +1,4 @@
-# GASHAM-MASDİ DownloaderOG
+# GASHAM DownloaderOG
 
 Termux üçün universal media yükləyici — Termux-YTD2.0 işləmə məntiqi ilə.
 YouTube, TikTok, Instagram, Facebook, X/Twitter, Reddit, Vimeo, Dailymotion və
@@ -9,7 +9,7 @@ yalnız **2 kliklə**: *Share → Termux → keyfiyyət seçimi*.
 
 ## 1. Layihə haqqında
 
-GASHAM-MASDİ DownloaderOG yüngül və sürətli bir Termux alətidir. Telefonda videonu
+GASHAM DownloaderOG yüngül və sürətli bir Termux alətidir. Telefonda videonu
 açıb **Paylaş (Share)** düyməsinə basdıqdan sonra **Termux** seçirsiniz və
 ekranda açılan menyudan keyfiyyəti qeyd edirsiniz — video/musiqi avtomatik
 yüklənir. YouTube **Shorts** paylaşdıqda isə menyu göstərilmədən birbaşa
@@ -27,7 +27,10 @@ platformanın dəstəyi avtomatik yenilənir və yükləmə sürəti maksimumdur
 - Orijinal video başlığı ilə fayl adlandırma (`%(title)s.%(ext)s`)
 - Yükləmə temp qovluqda aparılır, bitdikdə **cut (mv)** ilə birbaşa
   `/storage/emulated/0/DownloaderOG` klasörünə keçirilir — əlavə yer tutmur
-- `GASHAM-MASDİ` başlığı ilə professional terminal interfeysi
+- Fayllar **MediaStore/MediaScanner** (`termux-media-scan`) ilə sistemə
+  qeydiyyata alınır — şəkillər Qalereyada, MP3/audio fayllar musiqi
+  pleyerlərində avtomatik görünür
+- `GASHAM` ASCII başlığı ilə professional terminal interfeysi
 - Bir dəfəlik quraşdırma — ikinci dəfə konfiqurasiya tələb olunmur
 
 ## 3. Dəstəklənən platformalar
@@ -68,7 +71,7 @@ Quraşdırıcı avtomatik olaraq:
 
 - Paketləri yeniləyir (`apt update && apt upgrade`)
 - Storage icazəsi istəyir (`termux-setup-storage`)
-- `python` quraşdırır
+- `python`, `ffmpeg`, `termux-api` quraşdırır
 - `yt-dlp` quraşdırır/yeniləyir
 - `/storage/emulated/0/DownloaderOG` qovluğunu yaradır
 - `~/bin/` qovluğunu yaradır
@@ -94,7 +97,7 @@ Telefonda istənilən videonu/musiqini açın:
 
 1. **Share (Paylaş)** düyməsinə basın
 2. Menyudan **Termux** seçin
-3. Ekranda `GASHAM-MASDİ DownloaderOG` menyusu açılır
+3. Ekranda `GASHAM DownloaderOG` menyusu açılır
 4. İstədiyiniz seçimin nömrəsini yazın və Enter basın
 
 ```text
@@ -144,7 +147,11 @@ Bütün yüklənmiş fayllar:
 
 qovluğunda saxlanılır (Fallback: `~/storage/shared/DownloaderOG`). Fayl adları
 video/musiqinin orijinal başlığına uyğun olur, məsələn:
-`GASHAM-MASDİ - Example Video 2026.mp4`.
+`GASHAM - Example Video 2026.mp4`.
+
+Yükləndikdən sonra fayl avtomatik olaraq MediaScanner vasitəsilə Android
+MediaStore-a qeydiyyata alınır — şəkillər **Qalereyada**, MP3/audio fayllar
+**musiqi pleyerlərində** görünür (yalnız fayl meneceri deyil).
 
 Yükləmə əvvəlcə müvəqqəti qovluqda (`~/.cache/downloaderog`) aparılır;
 yükləmə tamamlandıqda fayl **cut (mv)** əmri ilə hədəf klasörə keçirilir və
@@ -167,6 +174,7 @@ final_dir='/storage/emulated/0/Music'
 | Link dəstəklənmir | Linkin tam və düzgün olduğunu yoxlayın |
 | İnternet xətası | Bağlantınızı yoxlayın, bir az sonra yenidən cəhd edin |
 | Shorts yüklənmir | Shorts linkinin `shorts` hissəsi olduğunu yoxlayın |
+| Şəkil Qalereyada / MP3 pleyerdə görünmür | `pkg install termux-api -y` işlədin və `bash install.sh` yenidən çalışdırın |
 
 ## 11. Yeniləmə
 

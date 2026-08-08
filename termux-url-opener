@@ -1,6 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-# GASHAM-MASDİ DOWNLOADEROG
+# GASHAM DOWNLOADEROG
 # Termux üçün universal media yükləyici (YouTube, TikTok, Instagram, ...)
 # İşləmə məntiqi: Paylaş (Share) → Termux → Menyu → Yükləmə (cut)
 
@@ -8,6 +8,15 @@
 final_dir='/storage/emulated/0/DownloaderOG'
 tmp_dir="$HOME/.cache/downloaderog"
 # -----------------------------------------------------------
+
+scan_media() {
+  if command -v termux-media-scan >/dev/null 2>&1; then
+    termux-media-scan "$1" >/dev/null 2>&1
+    echo -e "\e[036m[✓] MediaScanner: $(basename "$1") qeydiyyata alındı (Qalereya/pleyer)\e[0m"
+  else
+    echo -e "\e[033m[!] Media qeydiyyatı üçün termux-api quraşdırın: pkg install termux-api\e[0m"
+  fi
+}
 
 do_download() {
   mkdir -p "$tmp_dir" "$final_dir"
@@ -27,6 +36,7 @@ do_download() {
   done
   if [ -n "$moved" ]; then
     echo -e "\e[032m[✓] Fayl kəsildi (cut): $final_dir/$moved\e[0m"
+    scan_media "$final_dir/$moved"
   fi
 }
 
@@ -48,20 +58,23 @@ if [[ "$url" == *"shorts"* ]]; then
 fi
 
 show_banner() {
-  echo -e "\e[031m  ___   _   ___ _  _   _   __  __     __  __   _   ___ ___ _  _ _"
-  echo -e "\e[033m / __| /_\\ / __| || | /_\\ |  \\/  |___|  \\/  | /_\\ / __|   (_)(_).\\"
-  echo -e "\e[032m| (_ |/ _ \\\\__ \\ __ |/ _ \\| |\\/| |___| |\\/| |/ _ \\\\__ \\ |) /--\\\\_/"
-  echo -e "\e[034m \\___/_/ \\_\\___/_||_/_/ \\_\\_|  |_|   |_|  |_/_/ \\_\\___/___/_/\\_\\"
+  echo -e "\e[32m"
+  echo " ██████╗  █████╗ ███████╗██╗  ██╗ █████╗ ███╗   ███╗"
+  echo "██╔════╝ ██╔══██╗██╔════╝██║  ██║██╔══██╗████╗ ████║"
+  echo "██║  ███╗███████║███████╗███████║███████║██╔████╔██║"
+  echo "██║   ██║██╔══██║╚════██║██╔══██║██╔══██║██║╚██╔╝██║"
+  echo "╚██████╔╝██║  ██║███████║██║  ██║██║  ██║██║ ╚═╝ ██║"
+  echo " ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝"
   echo -e "\e[0m"
   echo -e "\e[036m ==============================================================="
-  echo -e "\e[036m == GASHAM-MASDİ DownloaderOG — Termux üçün universal yükləyici =="
+  echo -e "\e[036m == DownloaderOG — Termux üçün universal media yükləyici =="
   echo -e "\e[036m == YouTube • TikTok • Instagram • Facebook • X • Reddit • Vimeo =="
   echo -e "\e[0m"
 }
 
 show_menu() {
   echo -e "\e[036m╔════════════════════════════════════════════════════════════╗"
-  echo -e "\e[032m║ ♚ Project Name : GASHAM-MASDİ DownloaderOG™               ║"
+  echo -e "\e[032m║ ♚ Project Name : DownloaderOG™                           ║"
   echo -e "\e[032m║ ♚ Author       : Gasham Orujov                            ║"
   echo -e "\e[036m╠════════════════════════════════════════════════════════════╝"
   echo -e "\e[036m╠═▶ [ SELECT A FORMAT ] ➳"
@@ -77,7 +90,7 @@ show_menu() {
 }
 
 show_about() {
-  echo -e "\e[036m GASHAM-MASDİ DownloaderOG — telefonla Share (Paylaş) düyməsi ilə"
+  echo -e "\e[036m DownloaderOG — telefonla Share (Paylaş) düyməsi ilə"
   echo -e "\e[036m istənilən videonu/musiqini Termux vasitəsilə yükləyən universal"
   echo -e "\e[036m media yükləyicisidir. yt-dlp mühərriki sayəsində YouTube, TikTok,"
   echo -e "\e[036m Instagram, Facebook, X, Reddit, Vimeo və yüzlərlə platformanı"

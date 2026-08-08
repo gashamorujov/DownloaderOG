@@ -19,6 +19,9 @@ pkg install python -y
 echo -e "\e[034m[*] ffmpeg quraşdırılır (MP3 çevrilməsi üçün)...\e[0m"
 pkg install ffmpeg -y
 
+echo -e "\e[034m[*] termux-api quraşdırılır (MediaScanner / Qalereya üçün)...\e[0m"
+pkg install termux-api -y
+
 echo -e "\e[033m[*] yt-dlp quraşdırılır/yenilənir...\e[0m"
 python -m pip install -U yt-dlp
 
