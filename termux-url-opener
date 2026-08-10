@@ -81,9 +81,7 @@ show_banner() {
   echo "╚██████╔╝██║  ██║███████║██║  ██║██║  ██║██║ ╚═╝ ██║"
   echo " ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝"
   echo -e "\e[0m"
-  echo -e "\e[036m ==============================================================="
-  echo -e "\e[036m == DownloaderOG — Termux üçün universal media yükləyici =="
-  echo -e "\e[036m == YouTube • TikTok • Instagram • Facebook • X • Reddit • Vimeo =="
+  echo -e "\e[36;1m THE LIFE IS NOT FAIR, YOU SHOULD NOT BE A FAIR"
   echo -e "\e[0m"
 }
 
@@ -122,7 +120,7 @@ while true; do
 
   case $choice in
     1)
-      do_download -x --audio-format mp3 --audio-quality 0 --embed-metadata -f 'bestaudio/best' && exit_termux
+      do_download -x --audio-format mp3 --audio-quality 5 --embed-metadata --concurrent-fragments 8 -f 'bestaudio[ext=m4a]/bestaudio/best' && exit_termux
       ;;
     2)
       do_download -f 'best[height<=360]/best' && exit_termux

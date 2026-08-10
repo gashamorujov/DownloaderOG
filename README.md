@@ -30,8 +30,9 @@ platformanın dəstəyi avtomatik yenilənir və yükləmə sürəti maksimumdur
 - Fayllar **MediaStore/MediaScanner** (`termux-media-scan`) ilə sistemə
   qeydiyyata alınır — şəkillər Qalereyada, MP3/audio fayllar musiqi
   pleyerlərində avtomatik görünür
-- MP3 fayllarına ID3 metadatası (başlıq/artist) yazılır və `.mp3` /
-  `audio/mpeg` kimi qeydiyyata alınır — musiqi pleyerləri avtomatik tanıyır
+- MP3 sürətli yükləmə üçün optimallaşdırılıb (m4a mənbə + sürətli bitrate);
+  fayla ID3 metadatası (başlıq/artist) yazılır və `.mp3` / `audio/mpeg`
+  kimi qeydiyyata alınır — musiqi pleyerləri avtomatik tanıyır
 - Yükləmə **uğurla** tamamlandıqda Termux tamamilə bağlanır; yükləmə
   uğursuz olarsa Termux açıq qalır və menyuya qayıdılır
 - `GASHAM` ASCII başlığı ilə professional terminal interfeysi
