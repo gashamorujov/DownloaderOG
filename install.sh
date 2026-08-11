@@ -25,8 +25,8 @@ pkg install termux-api -y
 echo -e "\e[033m[*] yt-dlp quraşdırılır/yenilənir...\e[0m"
 python -m pip install -U yt-dlp
 
-echo -e "\e[036m[*] DownloaderOG qovluğu yaradılır...\e[0m"
-mkdir -p /storage/emulated/0/DownloaderOG 2>/dev/null || mkdir -p "$HOME/storage/shared/DownloaderOG"
+echo -e "\e[036m[*] Download qovluğu yaradılır...\e[0m"
+mkdir -p /storage/emulated/0/Download 2>/dev/null || mkdir -p "$HOME/storage/shared/Download"
 
 echo -e "\e[032m[*] ~/bin qovluğu yaradılır...\e[0m"
 mkdir -p "$HOME/bin"

@@ -1,13 +1,24 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
 # GASHAM DOWNLOADEROG
-# Termux üçün universal media yükləyici (YouTube, TikTok, Instagram, ...)
-# İşləmə məntiqi: Paylaş (Share) → Termux → Menyu → Yükləmə (cut)
+# Termux üçün universal media yükləyici
+# Paylaş → avtomatik platforma aşkarlama → yükləmə → MediaStore → Termux bağlanması
 
 # SETTINGS (istədiyiniz kimi dəyişə bilərsiniz)--------------
-final_dir='/storage/emulated/0/DownloaderOG'
+final_dir='/storage/emulated/0/Download'
 tmp_dir="$HOME/.cache/downloaderog"
 # -----------------------------------------------------------
+
+detect_platform() {
+  case "$1" in
+    *youtube.com*|*youtu.be*|*youtube-nocookie.com*|*music.youtube.com*) echo "youtube" ;;
+    *instagram.com*|*instagr.am*) echo "instagram" ;;
+    *tiktok.com*) echo "tiktok" ;;
+    *facebook.com*|*fb.watch*|*fb.com*) echo "facebook" ;;
+    *twitter.com*|*x.com*) echo "x" ;;
+    *) echo "other" ;;
+  esac
+}
 
 scan_media() {
   if command -v termux-media-scan >/dev/null 2>&1; then
@@ -31,6 +42,31 @@ exit_termux() {
   exit 0
 }
 
+move_unique() {
+  src="$1"
+  dir="$2"
+  base="$(basename "$src")"
+  if [[ "$base" == *.* ]]; then
+    name="${base%.*}"
+    ext="${base##*.}"
+  else
+    name="$base"
+    ext=""
+  fi
+  dest="$dir/$base"
+  n=1
+  while [ -e "$dest" ]; do
+    if [ -n "$ext" ]; then
+      dest="$dir/$name ($n).$ext"
+    else
+      dest="$dir/$name ($n)"
+    fi
+    n=$((n+1))
+  done
+  mv -f "$src" "$dest"
+  echo "$dest"
+}
+
 do_download() {
   mkdir -p "$tmp_dir" "$final_dir"
   yt-dlp "$@" -o "$tmp_dir/%(title)s.%(ext)s" "$url"
@@ -43,15 +79,20 @@ do_download() {
   moved=""
   for f in "$tmp_dir"/*; do
     [ -e "$f" ] || continue
-    name="$(basename "$f")"
-    mv -f "$f" "$final_dir/"
-    moved="$name"
+    dest="$(move_unique "$f" "$final_dir")"
+    moved="$(basename "$dest")"
   done
   if [ -n "$moved" ]; then
     echo -e "\e[032m[✓] Fayl kəsildi (cut): $final_dir/$moved\e[0m"
     scan_media "$final_dir/$moved"
   fi
   return 0
+}
+
+wait_and_keep_open() {
+  echo -e "\e[033m Davam etmək üçün Enter basın...\e[0m"
+  read -r _
+  exit 0
 }
 
 url="$1"
@@ -67,10 +108,52 @@ fi
 # YouTube Shorts — avtomatik yükləmə (menyu göstərilmir)
 if [[ "$url" == *"shorts"* ]]; then
   echo -e "\e[036m Short aşkarlandı — avtomatik yüklənir...\e[0m"
-  if do_download; then
+  if do_download -f 'bestvideo*+bestaudio/best' --merge-output-format mp4; then
     exit_termux
+  else
+    wait_and_keep_open
   fi
 fi
+
+platform="$(detect_platform "$url")"
+
+# Instagram / TikTok / Facebook / X — avtomatik ən yüksək keyfiyyət (menyu yoxdur)
+case "$platform" in
+  instagram|tiktok|facebook|x)
+    echo -e "\e[036m Platforma: ${platform^^} — avtomatik ən yüksək keyfiyyət yüklənir...\e[0m"
+    if do_download -f 'bestvideo*+bestaudio/best' --merge-output-format mp4; then
+      exit_termux
+    else
+      wait_and_keep_open
+    fi
+    ;;
+esac
+
+# YouTube və digər platformalar — dinamik real keyfiyyət siyahısı
+meta="$(yt-dlp --no-warnings --skip-download -j "$url" 2>/dev/null | python3 -c '
+import json, sys
+try:
+    d = json.load(sys.stdin)
+except Exception:
+    sys.exit(1)
+title = (d.get("title") or "Bilinməyən başlıq").replace("\n", " ").replace("\t", " ")
+heights = sorted({f.get("height") for f in d.get("formats") or []
+                  if f.get("height") and (f.get("vcodec") or "") != "none"})
+print(title)
+print(",".join(str(h) for h in heights))
+')"
+
+if [ -z "$meta" ]; then
+  echo -e "\e[031m[!] Xəta: Bu linkdən media məlumatı alına bilmədi — link düzgün deyil, silinib və ya privatdır.\e[0m"
+  wait_and_keep_open
+fi
+
+title="$(printf '%s\n' "$meta" | sed -n '1p')"
+[ -z "$title" ] && title="Bilinməyən başlıq"
+heights_csv="$(printf '%s\n' "$meta" | sed -n '2p')"
+IFS=',' read -r -a heights <<< "$heights_csv"
+mp3_num=$(( ${#heights[@]} + 1 ))
+total="$mp3_num"
 
 show_banner() {
   echo -e "\e[32m"
@@ -90,25 +173,32 @@ show_menu() {
   echo -e "\e[032m║ ♚ Project Name : DownloaderOG™                           ║"
   echo -e "\e[032m║ ♚ Author       : Gasham Orujov                            ║"
   echo -e "\e[036m╠════════════════════════════════════════════════════════════╝"
+  echo -e "\e[032m Başlıq: $title"
   echo -e "\e[036m╠═▶ [ SELECT A FORMAT ] ➳"
-  echo -e "\e[032m╠═▶ 1. Music MP3♫"
-  echo -e "\e[032m╠═▶ 2. Video 360p"
-  echo -e "\e[032m╠═▶ 3. Video 480p"
-  echo -e "\e[032m╠═▶ 4. Video 720p"
-  echo -e "\e[032m╠═▶ 5. Video 1080p"
-  echo -e "\e[032m╠═▶ 6. Video 2160p"
-  echo -e "\e[032m╠═▶ 7. Exit DownloaderOG"
-  echo -e "\e[032m╠═▶ A. About"
+  local num=0
+  if [ "${#heights[@]}" -gt 0 ]; then
+    echo -e "\e[036m MP4"
+    for h in "${heights[@]}"; do
+      num=$((num+1))
+      echo -e "\e[032m   $num. ${h}p"
+    done
+  fi
+  echo -e "\e[036m MP3"
+  echo -e "\e[032m   $mp3_num. MP3 yüklə"
+  echo -e "\e[032m   A. About"
+  echo -e "\e[032m   Q. Çıxış"
   printf "\e[032m ╚═:➤ \e[0m "
 }
 
 show_about() {
-  echo -e "\e[036m DownloaderOG — telefonla Share (Paylaş) düyməsi ilə"
-  echo -e "\e[036m istənilən videonu/musiqini Termux vasitəsilə yükləyən universal"
-  echo -e "\e[036m media yükləyicisidir. yt-dlp mühərriki sayəsində YouTube, TikTok,"
-  echo -e "\e[036m Instagram, Facebook, X, Reddit, Vimeo və yüzlərlə platformanı"
-  echo -e "\e[036m dəstəkləyir. Yüklənən fayllar cut (kəsmə) ilə birbaşa"
-  echo -e "\e[036m /storage/emulated/0/DownloaderOG klasörünə keçirilir.\e[0m"
+  echo -e "\e[036m DownloaderOG — telefonla Share (Paylaş) düyməsi ilə istənilən"
+  echo -e "\e[036m videonu/musiqini Termux vasitəsilə yükləyən universal media"
+  echo -e "\e[036m yükləyicisidir. Instagram, TikTok, Facebook və X/Twitter linkləri"
+  echo -e "\e[036m avtomatik, ən yüksək keyfiyyətdə yüklənir. YouTube və digər"
+  echo -e "\e[036m platformalarda yalnız real mövcud keyfiyyətlər göstərilir."
+  echo -e "\e[036m Fayllar cut (kəsmə) ilə /storage/emulated/0/Download klasörünə"
+  echo -e "\e[036m keçirilir və MediaStore-a qeydiyyata alınır. Uğurlu yükləmədən"
+  echo -e "\e[036m sonra Termux avtomatik bağlanır.\e[0m"
   echo -e "\e[033m Daha çox məlumat: github.com/gashamorujov/DownloaderOG\e[0m"
   echo -e "\e[0m"
 }
@@ -118,35 +208,26 @@ while true; do
   show_menu
   read choice
 
-  case $choice in
-    1)
-      do_download -x --audio-format mp3 --audio-quality 5 --embed-metadata --concurrent-fragments 8 -f 'bestaudio[ext=m4a]/bestaudio/best' && exit_termux
-      ;;
-    2)
-      do_download -f 'best[height<=360]/best' && exit_termux
-      ;;
-    3)
-      do_download -f 'best[height<=480]/best' && exit_termux
-      ;;
-    4)
-      do_download -f 'best[height<=720]/best' && exit_termux
-      ;;
-    5)
-      do_download -f 'best[height<=1080]/best' && exit_termux
-      ;;
-    6)
-      do_download -f 'best[height<=2160]/best' && exit_termux
-      ;;
-    7)
-      echo -e "\e[032m DownloaderOG-dan çıxıldı. Sağ olun!\e[0m"
-      exit 0
-      ;;
+  case "$choice" in
     A|a)
       show_about
       continue
       ;;
+    Q|q)
+      echo -e "\e[032m DownloaderOG-dan çıxıldı. Sağ olun!\e[0m"
+      exit 0
+      ;;
     *)
-      do_download -f 'best[height<=2160]/best' && exit_termux
+      if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "$total" ]; then
+        if [ "$choice" -le "${#heights[@]}" ]; then
+          h="${heights[$((choice-1))]}"
+          do_download -f "bestvideo[height<=$h]+bestaudio/best[height<=$h]/best" --merge-output-format mp4 && exit_termux
+        else
+          do_download -x --audio-format mp3 --audio-quality 5 --embed-metadata --concurrent-fragments 8 -f 'bestaudio[ext=m4a]/bestaudio/best' && exit_termux
+        fi
+      else
+        echo -e "\e[031m[!] Xəta: düzgün seçim daxil edin (1-$total, A və ya Q).\e[0m"
+      fi
       ;;
   esac
 done

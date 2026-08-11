@@ -1,19 +1,24 @@
 # GASHAM DownloaderOG
 
-Termux üçün universal media yükləyici — Termux-YTD2.0 işləmə məntiqi ilə.
+Termux üçün universal media yükləyici.
 YouTube, TikTok, Instagram, Facebook, X/Twitter, Reddit, Vimeo, Dailymotion və
 yt-dlp-nin dəstəklədiyi yüzlərlə platformadan video və musiqi yükləyin —
-yalnız **2 kliklə**: *Share → Termux → keyfiyyət seçimi*.
+yalnız **Share → Termux** ilə — link avtomatik tanınır, platforma avtomatik
+müəyyən olunur və uyğun proses avtomatik başlayır.
 
 ---
 
 ## 1. Layihə haqqında
 
 GASHAM DownloaderOG yüngül və sürətli bir Termux alətidir. Telefonda videonu
-açıb **Paylaş (Share)** düyməsinə basdıqdan sonra **Termux** seçirsiniz və
-ekranda açılan menyudan keyfiyyəti qeyd edirsiniz — video/musiqi avtomatik
-yüklənir. YouTube **Shorts** paylaşdıqda isə menyu göstərilmədən birbaşa
-avtomatik yüklənir.
+açıb **Paylaş (Share)** düyməsinə basdıqdan sonra **Termux** seçirsiniz —
+sistem linki avtomatik tanıyır:
+
+- **Instagram / TikTok / Facebook / X (Twitter)** — menyu göstərilmədən
+  avtomatik, ən yüksək keyfiyyətdə yüklənir (video və şəkil)
+- **YouTube / digər platformalar** — yalnız videoda real mövcud olan
+  keyfiyyətlər göstərilir, istədiyinizi seçirsiniz (MP3 seçimi də var)
+- **YouTube Shorts** — menyu göstərilmədən avtomatik yüklənir
 
 Yükləmə mühərriki olaraq **yt-dlp** istifadə olunur — ona görə yüzlərlə
 platformanın dəstəyi avtomatik yenilənir və yükləmə sürəti maksimumdur.
@@ -21,12 +26,18 @@ platformanın dəstəyi avtomatik yenilənir və yükləmə sürəti maksimumdur
 ## 2. Əsas xüsusiyyətlər
 
 - Share → Termux ilə avtomatik link qəbulu
+- Avtomatik platforma aşkarlama (Instagram/TikTok/Facebook/X → menyusuz,
+  ən yüksək keyfiyyət; YouTube/digər → dinamik keyfiyyət siyahısı)
+- Dinamik keyfiyyət sistemi — yalnız mənbədə real mövcud keyfiyyətlər
+  göstərilir (sabit siyahı yoxdur)
 - YouTube Shorts üçün bir kliklə avtomatik yükləmə
-- Keyfiyyət seçimi: **Music MP3**, **360p**, **480p**, **720p**, **1080p**, **2160p**
+- YouTube və digər platformalarda **MP3 yüklə** seçimi
 - Canlı yükləmə prosesi (yt-dlp progress bar)
-- Orijinal video başlığı ilə fayl adlandırma (`%(title)s.%(ext)s`)
+- Orijinal video başlığı ilə fayl adlandırma (`%(title)s.%(ext)s`,
+  Unicode/Azərbaycan dili dəstəyi)
+- Eyni adlı fayl mövcuddursa üzərinə yazılmır — avtomatik `(1)`, `(2)` əlavə olunur
 - Yükləmə temp qovluqda aparılır, bitdikdə **cut (mv)** ilə birbaşa
-  `/storage/emulated/0/DownloaderOG` klasörünə keçirilir — əlavə yer tutmur
+  `/storage/emulated/0/Download` klasörünə keçirilir — əlavə yer tutmur
 - Fayllar **MediaStore/MediaScanner** (`termux-media-scan`) ilə sistemə
   qeydiyyata alınır — şəkillər Qalereyada, MP3/audio fayllar musiqi
   pleyerlərində avtomatik görünür
@@ -78,7 +89,7 @@ Quraşdırıcı avtomatik olaraq:
 - Storage icazəsi istəyir (`termux-setup-storage`)
 - `python`, `ffmpeg`, `termux-api` quraşdırır
 - `yt-dlp` quraşdırır/yeniləyir
-- `/storage/emulated/0/DownloaderOG` qovluğunu yaradır
+- `/storage/emulated/0/Download` qovluğunu yaradır
 - `~/bin/` qovluğunu yaradır
 - `~/bin/termux-url-opener` faylını quraşdırır və icra icazəsi verir (Share inteqrasiyası)
 - `~/.termux/termux-url-opener` ünvanını da yeniləyir (müasir Termux üçün)
@@ -102,26 +113,29 @@ Telefonda istənilən videonu/musiqini açın:
 
 1. **Share (Paylaş)** düyməsinə basın
 2. Menyudan **Termux** seçin
-3. Ekranda `GASHAM DownloaderOG` menyusu açılır
-4. İstədiyiniz seçimin nömrəsini yazın və Enter basın
+3. Sistem platformanı avtomatik müəyyən edir:
+   - Instagram/TikTok/Facebook/X → yükləmə avtomatik başlayır (seçim yoxdur)
+   - YouTube/digər → real keyfiyyətlər göstərilir, nömrə yazıb Enter basın
 
 ```text
-╠═▶ 1. Music MP3♫
-╠═▶ 2. Video 360p
-╠═▶ 3. Video 480p
-╠═▶ 4. Video 720p
-╠═▶ 5. Video 1080p
-╠═▶ 6. Video 2160p
-╠═▶ 7. Exit DownloaderOG
+MP4
+  1. 144p
+  2. 360p
+  3. 720p
+  4. 1080p
+MP3
+  5. MP3 yüklə
 ╠═▶ A. About
+╠═▶ Q. Çıxış
 ╚═:➤
 ```
 
 `A` yazdıqda məlumat (About) göstərilir və yenidən seçim menyusuna qayıdılır.
-Yükləmə **uğurla** başa çatdıqda proqram bir neçə saniyə mesajı göstərir və
-Termux tamamilə bağlanır — əlavə "Enter" və ya başqa əməliyyat tələb olunmur.
-Yükləmə xəta ilə bitsə, Termux bağlanmır — menyuya qayıdılır və yenidən cəhd
-etmək mümkündür.
+Yuxarıdakı siyahı nümunədir — sistem yalnız həmin videoda həqiqətən mövcud
+olan keyfiyyətləri göstərir. Yükləmə **uğurla** başa çatdıqda proqram bir neçə
+saniyə mesajı göstərir və Termux tamamilə bağlanır — əlavə "Enter" və ya başqa
+əməliyyat tələb olunmur. Yükləmə xəta ilə bitsə, Termux bağlanmır — menyuya
+qayıdılır və yenidən cəhd etmək mümkündür.
 
 Əl ilə test üçün link skriptə birbaşa da verilə bilər:
 
@@ -151,10 +165,10 @@ mexanizminin ən real və stabil həllidir.
 Bütün yüklənmiş fayllar:
 
 ```text
-/storage/emulated/0/DownloaderOG
+/storage/emulated/0/Download
 ```
 
-qovluğunda saxlanılır (Fallback: `~/storage/shared/DownloaderOG`). Fayl adları
+qovluğunda saxlanılır (Fallback: `~/storage/shared/Download`). Fayl adları
 video/musiqinin orijinal başlığına uyğun olur, məsələn:
 `GASHAM - Example Video 2026.mp4`.
 
