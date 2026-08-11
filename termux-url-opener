@@ -45,12 +45,30 @@ detect_platform() {
 }
 
 scan_media() {
+  file="$1"
   if command -v termux-media-scan >/dev/null 2>&1; then
-    termux-media-scan "$1" >/dev/null 2>&1
-    echo -e "\e[036m[✓] MediaScanner: $(basename "$1") qeydiyyata alındı (Qalereya/pleyer)\e[0m"
+    # termux-media-scan bəzi Android versiyalarında (14+) əbədi asıla bilər —
+    # buna görə maks. 10 saniyə gözləyirik, sonra broadcast ilə davam edirik
+    termux-media-scan "$file" >/dev/null 2>&1 &
+    scan_pid=$!
+    waited=0
+    while [ "$waited" -lt 10 ]; do
+      kill -0 "$scan_pid" 2>/dev/null || break
+      sleep 1
+      waited=$((waited+1))
+    done
+    if kill -0 "$scan_pid" 2>/dev/null; then
+      kill -9 "$scan_pid" 2>/dev/null
+      wait "$scan_pid" 2>/dev/null
+      echo -e "\e[033m[!] termux-media-scan vaxt aşımı — broadcast ilə yenidən cəhd olunur\e[0m"
+      am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d "file://$file" >/dev/null 2>&1
+    else
+      wait "$scan_pid" 2>/dev/null
+    fi
+    echo -e "\e[036m[✓] MediaScanner: $(basename "$file") qeydiyyata alındı (Qalereya/pleyer)\e[0m"
   elif command -v am >/dev/null 2>&1; then
-    am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d "file://$1" >/dev/null 2>&1
-    echo -e "\e[036m[✓] MediaScanner: $(basename "$1") qeydiyyata alındı (broadcast)\e[0m"
+    am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d "file://$file" >/dev/null 2>&1
+    echo -e "\e[036m[✓] MediaScanner: $(basename "$file") qeydiyyata alındı (broadcast)\e[0m"
   else
     echo -e "\e[033m[!] Media qeydiyyatı üçün termux-api quraşdırın: pkg install termux-api\e[0m"
   fi
@@ -69,6 +87,11 @@ exit_termux() {
     # 3) Son çarə: proqramı məcburi dayandır (icazə varsa)
     am force-stop com.termux >/dev/null 2>&1
   fi
+  # 4) Son çarə: sessiya qabığını bağla ki, terminal açıq qalmasın
+  ppid_comm="$(cat /proc/$PPID/comm 2>/dev/null)"
+  case "$ppid_comm" in
+    bash|sh|dash|mksh|zsh|login|fish) kill -9 "$PPID" >/dev/null 2>&1 ;;
+  esac
   exit 0
 }
 
@@ -119,6 +142,7 @@ do_download() {
     return 1
   fi
   if [ -f "$final_dir/$moved" ]; then
+    rm -f "$tmp_dir"/* 2>/dev/null
     echo -e "\e[032m[✓] Fayl kəsildi (cut): $final_dir/$moved\e[0m"
     scan_media "$final_dir/$moved"
     return 0

@@ -189,7 +189,9 @@ meneceri deyil). Qeydiyyat tamamlandıqdan sonra Termux bağlanır.
 
 Yükləmə əvvəlcə müvəqqəti qovluqda (`~/.cache/downloaderog`) aparılır;
 yükləmə tamamlandıqda fayl **cut (mv)** əmri ilə hədəf klasörə keçirilir və
-müvəqqəti qovluq boşalır — cihaz yaddaşında əlavə yer tutmur.
+müvəqqəti qovluq avtomatik **tamamilə təmizlənir** — nə temp, nə də əlavə
+kopya qalır. Telefonda yalnız hədəf fayl qalır:
+`/storage/emulated/0/Download/FaylAdi.mp3` (və ya `.mp4`).
 
 Yükləmə klasörünü dəyişmək üçün `~/.termux/termux-url-opener` faylının
 əvvəlindəki `final_dir` dəyərini redaktə edin:
@@ -236,7 +238,8 @@ cp ~/storage/downloads/cookies.txt ~/.config/downloaderog/cookies.txt
 | Link dəstəklənmir | Linkin tam və düzgün olduğunu yoxlayın |
 | İnternet xətası | Bağlantınızı yoxlayın, bir az sonra yenidən cəhd edin |
 | Shorts yüklənmir | Shorts linkinin `shorts` hissəsi olduğunu yoxlayın |
-| Şəkil Qalereyada / MP3 pleyerdə görünmür | `pkg install termux-api -y` işlədin və `bash install.sh` yenidən çalışdırın |
+| Şəkil Qalereyada / MP3 pleyerdə görünmür | F-Droid-dən **Termux:API tətbiqini** quraşdırın, sonra `bash install.sh` işlədin |
+| Yükləmə bitdi, amma Termux bağlanmır / asılır | Termux:API tətbiqinin quraşdığını yoxlayın; `bash install.sh` yenidən çalışdırın (skript media skanını vaxt limiti ilə idarə edir) |
 
 ## 12. Yeniləmə
 

@@ -21,6 +21,9 @@ pkg install ffmpeg -y
 
 echo -e "\e[034m[*] termux-api quraşdırılır (MediaScanner / Qalereya üçün)...\e[0m"
 pkg install termux-api -y
+echo -e "\e[033m[!] Diqqət: F-Droid-dən 'Termux:API' tətbiqini də quraşdırın —\e[0m"
+echo -e "\e[033m    media qeydiyyatı (Qalereya/musiqi pleyer) onunla işləyir.\e[0m"
+sleep 1
 
 echo -e "\e[034m[*] deno quraşdırılır (YouTube üçün JS mühərriki)...\e[0m"
 pkg install deno -y || echo -e "\e[033m[!] deno quraşdırıla bilmədi — YouTube üçün: pkg install deno\e[0m"
