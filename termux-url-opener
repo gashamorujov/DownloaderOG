@@ -7,7 +7,31 @@
 # SETTINGS (istədiyiniz kimi dəyişə bilərsiniz)--------------
 final_dir='/storage/emulated/0/Download'
 tmp_dir="$HOME/.cache/downloaderog"
+# Instagram/TikTok üçün (məcburi deyil): brauzerdə login olub cookies.txt
+# yaradın və ~/.config/downloaderog/cookies.txt ünvanına kopyalayın.
+cookies_file="$HOME/.config/downloaderog/cookies.txt"
 # -----------------------------------------------------------
+
+# Ümumi yükləmə bayraqları — platforma dəyişikliklərinə davamlılıq üçün
+dl_flags=(
+  --retries 10
+  --fragment-retries 10
+  --extractor-retries 5
+  --socket-timeout 30
+  --continue
+  --concurrent-fragments 8
+  --force-ipv4
+  --remote-components ejs:github
+)
+[ -f "$cookies_file" ] && dl_flags+=(--cookies "$cookies_file")
+
+# YouTube üçün JS mühərriki (yt-dlp indi bunu tələb edir)
+js_flags=()
+if command -v deno >/dev/null 2>&1; then
+  js_flags+=(--js-runtimes deno)
+elif command -v node >/dev/null 2>&1; then
+  js_flags+=(--js-runtimes node)
+fi
 
 detect_platform() {
   case "$1" in
@@ -69,24 +93,73 @@ move_unique() {
 
 do_download() {
   mkdir -p "$tmp_dir" "$final_dir"
-  yt-dlp "$@" -o "$tmp_dir/%(title)s.%(ext)s" "$url"
+  rm -f "$tmp_dir"/* 2>/dev/null
+  yt-dlp "${dl_flags[@]}" "${js_flags[@]}" "$@" -o "$tmp_dir/%(title)s.%(ext)s" "$url"
   status=$?
-  rm -f "$tmp_dir"/*.part 2>/dev/null
   if [ "$status" -ne 0 ]; then
     echo -e "\e[031m[!] Yükləmə xətası — heç bir fayl tamamlanmadı.\e[0m"
     return "$status"
   fi
   moved=""
+  found=""
   for f in "$tmp_dir"/*; do
     [ -e "$f" ] || continue
+    found=1
     dest="$(move_unique "$f" "$final_dir")"
     moved="$(basename "$dest")"
   done
-  if [ -n "$moved" ]; then
+  if [ -z "$found" ]; then
+    echo -e "\e[031m[!] Xəta: fayl tapılmadı — yükləmə tamamlanmadı.\e[0m"
+    return 1
+  fi
+  if [ -f "$final_dir/$moved" ]; then
     echo -e "\e[032m[✓] Fayl kəsildi (cut): $final_dir/$moved\e[0m"
     scan_media "$final_dir/$moved"
+    return 0
   fi
-  return 0
+  echo -e "\e[031m[!] Xəta: fayl hədəf klasörə yazıla bilmədi.\e[0m"
+  return 1
+}
+
+show_error_hint() {
+  case "$1" in
+    instagram)
+      echo -e "\e[033m[!] Instagram əksər linklər üçün giriş (login) tələb edir.\e[0m"
+      echo -e "\e[033m    Həll: brauzerdə Instagram-a daxil olun, 'Get cookies.txt LOCALLY'\e[0m"
+      echo -e "\e[033m    genişlənməsi ilə cookies.txt yaradın və onu:\e[0m"
+      echo -e "\e[033m    ~/.config/downloaderog/cookies.txt ünvanına kopyalayın.\e[0m"
+      echo -e "\e[033m    (Ətraflı: README.md → 'Instagram/TikTok üçün cookies')"
+      ;;
+    tiktok)
+      echo -e "\e[033m[!] TikTok bəzən anti-bot yoxlaması və ya giriş tələb edir.\e[0m"
+      echo -e "\e[033m    Həll: brauzerdə TikTok-a daxil olun, cookies.txt yaradın və onu:\e[0m"
+      echo -e "\e[033m    ~/.config/downloaderog/cookies.txt ünvanına kopyalayın.\e[0m"
+      echo -e "\e[033m    (Ətraflı: README.md → 'Instagram/TikTok üçün cookies')"
+      ;;
+  esac
+}
+
+check_requirements() {
+  if ! command -v yt-dlp >/dev/null 2>&1; then
+    echo -e "\e[031m[!] Xəta: yt-dlp quraşdırılmayıb. bash install.sh işlədin.\e[0m"
+    wait_and_keep_open
+  fi
+}
+
+meta_info() {
+  mkdir -p "$tmp_dir"
+  yt-dlp "${dl_flags[@]}" "${js_flags[@]}" --skip-download -j "$url" 2>"$tmp_dir/.meta_err" | python3 -c '
+import json, sys
+try:
+    d = json.load(sys.stdin)
+except Exception:
+    sys.exit(1)
+title = (d.get("title") or "Bilinməyən başlıq").replace("\n", " ").replace("\t", " ")
+heights = sorted({f.get("height") for f in d.get("formats") or []
+                  if f.get("height") and (f.get("vcodec") or "") != "none"})
+print(title)
+print(",".join(str(h) for h in heights))
+'
 }
 
 wait_and_keep_open() {
@@ -104,6 +177,7 @@ if [[ -z "$url" ]]; then
   echo -e "\e[031m Link daxil edilməyib. Çıxılır.\e[0m"
   exit 1
 fi
+check_requirements
 
 # YouTube Shorts — avtomatik yükləmə (menyu göstərilmir)
 if [[ "$url" == *"shorts"* ]]; then
@@ -124,35 +198,39 @@ case "$platform" in
     if do_download -f 'bestvideo*+bestaudio/best' --merge-output-format mp4; then
       exit_termux
     else
+      show_error_hint "$platform"
       wait_and_keep_open
     fi
     ;;
 esac
 
 # YouTube və digər platformalar — dinamik real keyfiyyət siyahısı
-meta="$(yt-dlp --no-warnings --skip-download -j "$url" 2>/dev/null | python3 -c '
-import json, sys
-try:
-    d = json.load(sys.stdin)
-except Exception:
-    sys.exit(1)
-title = (d.get("title") or "Bilinməyən başlıq").replace("\n", " ").replace("\t", " ")
-heights = sorted({f.get("height") for f in d.get("formats") or []
-                  if f.get("height") and (f.get("vcodec") or "") != "none"})
-print(title)
-print(",".join(str(h) for h in heights))
-')"
-
+meta="$(meta_info)"
 if [ -z "$meta" ]; then
-  echo -e "\e[031m[!] Xəta: Bu linkdən media məlumatı alına bilmədi — link düzgün deyil, silinib və ya privatdır.\e[0m"
+  echo -e "\e[031m[!] Xəta: Bu linkdən media məlumatı alına bilmədi — link düzgün deyil, silinib,\e[0m"
+  echo -e "\e[031m    privatdır və ya platforma giriş (login) tələb edir.\e[0m"
+  if [ -s "$tmp_dir/.meta_err" ]; then
+    echo -e "\e[033m[Yt-dlp mesajı:]\e[0m"
+    sed 's/\x1b\[[0-9;]*m//g' "$tmp_dir/.meta_err" | tail -4
+    echo -e "\e[0m"
+  fi
+  rm -f "$tmp_dir/.meta_err"
   wait_and_keep_open
 fi
+rm -f "$tmp_dir/.meta_err"
 
 title="$(printf '%s\n' "$meta" | sed -n '1p')"
 [ -z "$title" ] && title="Bilinməyən başlıq"
 heights_csv="$(printf '%s\n' "$meta" | sed -n '2p')"
 IFS=',' read -r -a heights <<< "$heights_csv"
-mp3_num=$(( ${#heights[@]} + 1 ))
+if [ "${#heights[@]}" -eq 0 ]; then
+  # Direkt fayl/məlumat yoxdursa (məs. birbaşa .mp4 linki) — "ən yaxşı MP4" seçimi
+  has_fallback=1
+  mp3_num=2
+else
+  has_fallback=0
+  mp3_num=$(( ${#heights[@]} + 1 ))
+fi
 total="$mp3_num"
 
 show_banner() {
@@ -176,8 +254,10 @@ show_menu() {
   echo -e "\e[032m Başlıq: $title"
   echo -e "\e[036m╠═▶ [ SELECT A FORMAT ] ➳"
   local num=0
-  if [ "${#heights[@]}" -gt 0 ]; then
-    echo -e "\e[036m MP4"
+  echo -e "\e[036m MP4"
+  if [ "$has_fallback" -eq 1 ]; then
+    echo -e "\e[032m   1. Ən yaxşı keyfiyyət (MP4)"
+  else
     for h in "${heights[@]}"; do
       num=$((num+1))
       echo -e "\e[032m   $num. ${h}p"
@@ -185,8 +265,8 @@ show_menu() {
   fi
   echo -e "\e[036m MP3"
   echo -e "\e[032m   $mp3_num. MP3 yüklə"
-  echo -e "\e[032m   A. About"
-  echo -e "\e[032m   Q. Çıxış"
+  echo -e "\e[036m   A. About"
+  echo -e "\e[036m   Q. Çıxış"
   printf "\e[032m ╚═:➤ \e[0m "
 }
 
@@ -199,7 +279,6 @@ show_about() {
   echo -e "\e[036m Fayllar cut (kəsmə) ilə /storage/emulated/0/Download klasörünə"
   echo -e "\e[036m keçirilir və MediaStore-a qeydiyyata alınır. Uğurlu yükləmədən"
   echo -e "\e[036m sonra Termux avtomatik bağlanır.\e[0m"
-  echo -e "\e[033m Daha çox məlumat: github.com/gashamorujov/DownloaderOG\e[0m"
   echo -e "\e[0m"
 }
 
@@ -219,11 +298,13 @@ while true; do
       ;;
     *)
       if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "$total" ]; then
-        if [ "$choice" -le "${#heights[@]}" ]; then
+        if [ "$has_fallback" -eq 1 ] && [ "$choice" -eq 1 ]; then
+          do_download -f 'bestvideo*+bestaudio/best' --merge-output-format mp4 && exit_termux
+        elif [ "$choice" -le "${#heights[@]}" ]; then
           h="${heights[$((choice-1))]}"
           do_download -f "bestvideo[height<=$h]+bestaudio/best[height<=$h]/best" --merge-output-format mp4 && exit_termux
         else
-          do_download -x --audio-format mp3 --audio-quality 5 --embed-metadata --concurrent-fragments 8 -f 'bestaudio[ext=m4a]/bestaudio/best' && exit_termux
+          do_download -x --audio-format mp3 --audio-quality 5 --embed-metadata -f 'bestaudio[ext=m4a]/bestaudio/best' && exit_termux
         fi
       else
         echo -e "\e[031m[!] Xəta: düzgün seçim daxil edin (1-$total, A və ya Q).\e[0m"

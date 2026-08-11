@@ -88,7 +88,10 @@ Quraşdırıcı avtomatik olaraq:
 - Paketləri yeniləyir (`apt update && apt upgrade`)
 - Storage icazəsi istəyir (`termux-setup-storage`)
 - `python`, `ffmpeg`, `termux-api` quraşdırır
+- `deno` quraşdırır (YouTube üçün tələb olunan JS mühərriki)
 - `yt-dlp` quraşdırır/yeniləyir
+- `curl_cffi` quraşdırır (TikTok üçün tələb olunan brauzer impersonasiya dəstəyi)
+- `~/.config/downloaderog/` qovluğunu yaradır (cookies.txt üçün)
 - `/storage/emulated/0/Download` qovluğunu yaradır
 - `~/bin/` qovluğunu yaradır
 - `~/bin/termux-url-opener` faylını quraşdırır və icra icazəsi verir (Share inteqrasiyası)
@@ -132,8 +135,10 @@ MP3
 
 `A` yazdıqda məlumat (About) göstərilir və yenidən seçim menyusuna qayıdılır.
 Yuxarıdakı siyahı nümunədir — sistem yalnız həmin videoda həqiqətən mövcud
-olan keyfiyyətləri göstərir. Yükləmə **uğurla** başa çatdıqda proqram bir neçə
-saniyə mesajı göstərir və Termux tamamilə bağlanır — əlavə "Enter" və ya başqa
+olan keyfiyyətləri göstərir. Birbaşa fayl linklərində (məs. `.mp4`) keyfiyyət
+siyahısı olmadığı üçün **"1. Ən yaxşı keyfiyyət (MP4)"** seçimi göstərilir.
+Yükləmə **uğurla** başa çatdıqda proqram bir neçə saniyə mesajı göstərir və
+Termux tamamilə bağlanır — əlavə "Enter" və ya başqa
 əməliyyat tələb olunmur. Yükləmə xəta ilə bitsə, Termux bağlanmır — menyuya
 qayıdılır və yenidən cəhd etmək mümkündür.
 
@@ -188,19 +193,46 @@ Yükləmə klasörünü dəyişmək üçün `~/.termux/termux-url-opener` faylı
 final_dir='/storage/emulated/0/Music'
 ```
 
-## 10. Problemlərin həlli
+## 10. Instagram/TikTok üçün cookies
+
+Instagram və TikTok hazırda əksər məzmun üçün **giriş (login)** tələb edir —
+buna görə yükləmə "empty media response", "login required" və ya
+"anti-bot" xətası verə bilər. Bu tam normaldır və asanlıqla həll olunur:
+
+1. Telefon və ya kompüter brauzerində Instagram/TikTok-a **daxil olun**.
+2. Brauzerə **"Get cookies.txt LOCALLY"** genişlənməsini əlavə edin
+   (Chrome/Edge/Firefox üçün mövcuddur).
+3. tiktok.com / instagram.com səhifəsində genişlənmənin düyməsinə basın →
+   **Export** → `cookies.txt` faylı endirilir.
+4. Faylı telefona köçürün (məs. `~/storage/downloads/cookies.txt`) və sonra:
+
+```bash
+cp ~/storage/downloads/cookies.txt ~/.config/downloaderog/cookies.txt
+```
+
+5. Videonu yenidən paylaşın — skript cookies faylını avtomatik istifadə edir.
+
+> ⚠️ `cookies.txt` şəxsi sessiya məlumatınızı ehtiva edir — heç kimlə
+> paylaşmayın və hesab təhlükəsizliyi üçün yalnız öz cihazınızda saxlayın.
+> Cookies olmadan da TikTok/Instagram-ın çoxu **açıq (public)** videoları
+> işləyir; lakin giriş tələb edən məzmun üçün cookies məcburidir.
+
+## 11. Problemlərin həlli
 
 | Problem | Həll |
 | --- | --- |
 | "No such file or directory" (storage) | `termux-setup-storage` işlədin və icazəni təsdiqləyin |
 | Share menyusunda Termux görünmür | Termux-u yeniləyin, sonra `bash install.sh` işlədin |
+| Instagram/TikTok: login / empty media / anti-bot xətası | Bölmə 10: cookies.txt yaradın → `~/.config/downloaderog/cookies.txt` |
+| YouTube: "No supported JavaScript runtime" | `pkg install deno -y` (sonra `bash install.sh`) |
 | yt-dlp köhnədir / platforma xətası | `python -m pip install -U yt-dlp` |
+| TikTok: "no impersonate target is available" | `bash install.sh` — `curl_cffi` quraşdırır |
 | Link dəstəklənmir | Linkin tam və düzgün olduğunu yoxlayın |
 | İnternet xətası | Bağlantınızı yoxlayın, bir az sonra yenidən cəhd edin |
 | Shorts yüklənmir | Shorts linkinin `shorts` hissəsi olduğunu yoxlayın |
 | Şəkil Qalereyada / MP3 pleyerdə görünmür | `pkg install termux-api -y` işlədin və `bash install.sh` yenidən çalışdırın |
 
-## 11. Yeniləmə
+## 12. Yeniləmə
 
 ```bash
 cd ~/DownloaderOG
@@ -210,7 +242,7 @@ bash install.sh
 
 Skript yeniləndikdə `termux-url-opener` avtomatik yenidən quraşdırılır.
 
-## 12. License
+## 13. License
 
 [MIT License](LICENSE) — 2026 Gasham Orujov.
 
