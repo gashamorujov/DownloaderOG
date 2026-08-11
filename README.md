@@ -15,7 +15,8 @@ açıb **Paylaş (Share)** düyməsinə basdıqdan sonra **Termux** seçirsiniz 
 sistem linki avtomatik tanıyır:
 
 - **Instagram / TikTok / Facebook / X (Twitter)** — menyu göstərilmədən
-  avtomatik, ən yüksək keyfiyyətdə yüklənir (video və şəkil)
+  avtomatik, ən yüksək keyfiyyətdə yüklənir (video və şəkil); TikTok-da web
+  marşrutu uğursuz olarsa sistem avtomatik mobil API marşrutuna keçir
 - **YouTube / digər platformalar** — yalnız videoda real mövcud olan
   keyfiyyətlər göstərilir, istədiyinizi seçirsiniz (MP3 seçimi də var)
 - **YouTube Shorts** — menyu göstərilmədən avtomatik yüklənir
@@ -44,8 +45,10 @@ platformanın dəstəyi avtomatik yenilənir və yükləmə sürəti maksimumdur
 - MP3 sürətli yükləmə üçün optimallaşdırılıb (m4a mənbə + sürətli bitrate);
   fayla ID3 metadatası (başlıq/artist) yazılır və `.mp3` / `audio/mpeg`
   kimi qeydiyyata alınır — musiqi pleyerləri avtomatik tanıyır
-- Yükləmə **uğurla** tamamlandıqda Termux tamamilə bağlanır; yükləmə
-  uğursuz olarsa Termux açıq qalır və menyuya qayıdılır
+- Yükləmə **uğurla** tamamlandıqda Termux tamamilə bağlanır — Termux-un rəsmi
+  `com.termux.service_stop` mexanizmi ilə bütün sessiyalar dayandırılır və
+  proqram avtomatik bağlanır (istifadəçi heç bir düyməyə toxunmur);
+  yükləmə uğursuz olarsa Termux açıq qalır və menyuya qayıdılır
 - `GASHAM` ASCII başlığı ilə professional terminal interfeysi
 - Bir dəfəlik quraşdırma — ikinci dəfə konfiqurasiya tələb olunmur
 
@@ -137,8 +140,10 @@ MP3
 Yuxarıdakı siyahı nümunədir — sistem yalnız həmin videoda həqiqətən mövcud
 olan keyfiyyətləri göstərir. Birbaşa fayl linklərində (məs. `.mp4`) keyfiyyət
 siyahısı olmadığı üçün **"1. Ən yaxşı keyfiyyət (MP4)"** seçimi göstərilir.
-Yükləmə **uğurla** başa çatdıqda proqram bir neçə saniyə mesajı göstərir və
-Termux tamamilə bağlanır — əlavə "Enter" və ya başqa
+Yükləmə **uğurla** başa çatdıqda proqram bir neçə saniyə mesajı göstərir,
+faylın yaddaşa yazıldığını yoxlayır, media qeydiyyatını tamamlayır və
+Termux-un rəsmi `com.termux.service_stop` aksiyası ilə proqramı tamamilə
+bağlayır — istifadəçi heç bir düyməyə (Enter, Ctrl+Z, exit) toxunmur.
 əməliyyat tələb olunmur. Yükləmə xəta ilə bitsə, Termux bağlanmır — menyuya
 qayıdılır və yenidən cəhd etmək mümkündür.
 
@@ -224,6 +229,7 @@ cp ~/storage/downloads/cookies.txt ~/.config/downloaderog/cookies.txt
 | "No such file or directory" (storage) | `termux-setup-storage` işlədin və icazəni təsdiqləyin |
 | Share menyusunda Termux görünmür | Termux-u yeniləyin, sonra `bash install.sh` işlədin |
 | Instagram/TikTok: login / empty media / anti-bot xətası | Bölmə 10: cookies.txt yaradın → `~/.config/downloaderog/cookies.txt` |
+| TikTok: "Unexpected response" / WAF xətası | `bash install.sh` (curl_cffi quraşdırır) + cookies; Wi-Fi-da yoxdursa mobil internetdə sınayın |
 | YouTube: "No supported JavaScript runtime" | `pkg install deno -y` (sonra `bash install.sh`) |
 | yt-dlp köhnədir / platforma xətası | `python -m pip install -U yt-dlp` |
 | TikTok: "no impersonate target is available" | `bash install.sh` — `curl_cffi` quraşdırır |
