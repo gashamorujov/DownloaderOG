@@ -77,17 +77,16 @@ scan_media() {
 
 auto_exit() {
   # ===== 0-dan qurulmuş avtomatik çıxış sistemi =====
-  # Yaşıl [✓] mesajı çap olunan kimi çağırılır. İstifadəçi heç nə etmir.
+  # Yaşıl [✓] mesajı çap olunan kimi dərhal çağırılır (gözləmə yoxdur).
+  # İstifadəçi heç nə etmir — Ctrl+C + Enter ekvivalenti avtomatik icra olunur.
   # Sıra ilə (hansı işləsə, o bağlayır):
   #   1) Rəsmi Termux mexanizmi: bütün sessiyalar öldürülür, service dayanır,
   #      Activity özü bağlanır (com.termux.service_stop)
   #   2) Ev ekranına keçid + force-stop (icazə varsa)
   #   3) Termux app prosesinin birbaşa öldürülməsi (eyni UID — icazəsiz işləyir)
   #   4) Ctrl+C ekvivalenti (SIGINT) + sessiya qabığının bağlanması
-  sleep 1
   if command -v am >/dev/null 2>&1; then
     am startservice -a com.termux.service_stop -n com.termux/.app.TermuxService >/dev/null 2>&1
-    sleep 1
     am start -a android.intent.action.MAIN -c android.intent.category.HOME >/dev/null 2>&1
     am force-stop com.termux >/dev/null 2>&1
   fi
