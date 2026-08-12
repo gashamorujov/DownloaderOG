@@ -39,7 +39,7 @@ platformanın dəstəyi avtomatik yenilənir və yükləmə sürəti maksimumdur
 - Eyni adlı fayl mövcuddursa üzərinə yazılmır — avtomatik `(1)`, `(2)` əlavə olunur
 - Yükləmə temp qovluqda aparılır, bitdikdə **cut (mv)** ilə əvvəlcə
   `/storage/emulated/0/Download`-ə, emal bitdikdən sonra isə
-  `/storage/emulated/0/Download/DownloaderOG` klasörünə keçirilir —
+  `/storage/emulated/0/DownloaderOG` klasörünə keçirilir (kök səviyyə) —
   kopya yaradılmır, əlavə yer tutmur
 - Fayllar **MediaStore/MediaScanner** (`termux-media-scan`) ilə sistemə
   qeydiyyata alınır — şəkillər Qalereyada, MP3/audio fayllar musiqi
@@ -177,16 +177,18 @@ mexanizminin ən real və stabil həllidir.
 Bütün yüklənmiş faylların **son yeri**:
 
 ```text
-/storage/emulated/0/Download/DownloaderOG
+/storage/emulated/0/DownloaderOG
 ```
 
-qovluğudur (Fallback: `~/storage/shared/Download/DownloaderOG`). Proses:
+qovluğudur (Fallback: `~/storage/shared/DownloaderOG`). Qeyd: bu qovluq
+`Download` qovluğunun **daxilində deyil**, telefon yaddaşının kök səviyyəsində
+(`/storage/emulated/0/DownloaderOG/`) yerləşir. Proses:
 
 1. Yükləmə müvəqqəti qovluqda (`~/.cache/downloaderog`) aparılır
 2. Bitdikdə fayl **cut (mv)** ilə əvvəlcə `/storage/emulated/0/Download`-ə
    keçirilir
 3. Emal tamamlandıqdan sonra yenidən **cut (mv)** ilə
-   `/storage/emulated/0/Download/DownloaderOG` klasörünə köçürülür
+   `/storage/emulated/0/DownloaderOG` klasörünə köçürülür
 
 Kopya yaradılmır — yalnız move/cut edilir, ona görə ilkin `Download`
 qovluğunda ikinci nüsxə qalmaz və müvəqqəti qovluq boşalır. Fayl adları
@@ -201,11 +203,11 @@ meneceri deyil). Qeydiyyat tamamlandıqdan sonra yaşıl `[✓]` mesajı göstə
 və Termux avtomatik bağlanır.
 
 Yükləmə klasörünü dəyişmək üçün `~/.termux/termux-url-opener` faylının
-əvvəlindəki `final_dir` dəyərini redaktə edin (DownloaderOG alt-qovluğu
-avtomatik `final_dir/DownloaderOG` olur):
+əvvəlindəki `final_dir` və `og_dir` dəyərlərini redaktə edin:
 
 ```bash
-final_dir='/storage/emulated/0/Music'
+final_dir='/storage/emulated/0/Download'
+og_dir='/storage/emulated/0/DownloaderOG'
 ```
 
 ## 10. Instagram/TikTok üçün cookies

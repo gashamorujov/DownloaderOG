@@ -6,7 +6,7 @@
 
 # SETTINGS (istədiyiniz kimi dəyişə bilərsiniz)--------------
 final_dir='/storage/emulated/0/Download'
-og_dir="$final_dir/DownloaderOG"
+og_dir='/storage/emulated/0/DownloaderOG'
 tmp_dir="$HOME/.cache/downloaderog"
 # Instagram/TikTok üçün (məcburi deyil): brauzerdə login olub cookies.txt
 # yaradın və ~/.config/downloaderog/cookies.txt ünvanına kopyalayın.
@@ -75,23 +75,34 @@ scan_media() {
   fi
 }
 
-exit_termux() {
-  echo -e "\e[036m Yükləmə tamamlandı — Termux bağlanır...\e[0m"
-  sleep 2
+auto_exit() {
+  # ===== 0-dan qurulmuş avtomatik çıxış sistemi =====
+  # Yaşıl [✓] mesajı çap olunan kimi çağırılır. İstifadəçi heç nə etmir.
+  # Sıra ilə (hansı işləsə, o bağlayır):
+  #   1) Rəsmi Termux mexanizmi: bütün sessiyalar öldürülür, service dayanır,
+  #      Activity özü bağlanır (com.termux.service_stop)
+  #   2) Ev ekranına keçid + force-stop (icazə varsa)
+  #   3) Termux app prosesinin birbaşa öldürülməsi (eyni UID — icazəsiz işləyir)
+  #   4) Ctrl+C ekvivalenti (SIGINT) + sessiya qabığının bağlanması
+  sleep 1
   if command -v am >/dev/null 2>&1; then
-    # 1) Rəsmi Termux mexanizmi: bütün sessiyalar öldürülür, service dayanır,
-    #    Activity özü bağlanır — istifadəçi heç nə etmədən proqram tamamilə bağlanır
     am startservice -a com.termux.service_stop -n com.termux/.app.TermuxService >/dev/null 2>&1
     sleep 1
-    # 2) Köməkçi: ev ekranına keçid (service_stop işləməsə)
     am start -a android.intent.action.MAIN -c android.intent.category.HOME >/dev/null 2>&1
-    # 3) Son çarə: proqramı məcburi dayandır (icazə varsa)
     am force-stop com.termux >/dev/null 2>&1
   fi
-  # 4) Son çarə: sessiya qabığını bağla ki, terminal açıq qalmasın
+  # Termux app prosesini öldür (servis/am işləməsə də eyni UID-ə görə işləyir)
+  tpids="$(pidof com.termux 2>/dev/null || ps -A 2>/dev/null | awk '$NF == "com.termux" {print $1}')"
+  [ -n "$tpids" ] && kill -9 $tpids >/dev/null 2>&1
+  # Ctrl+C ekvivalenti: valideyn qabığın proses qrupuna SIGINT (yalnız qabıqdırsa)
   ppid_comm="$(cat /proc/$PPID/comm 2>/dev/null)"
   case "$ppid_comm" in
-    bash|sh|dash|mksh|zsh|login|fish) kill -9 "$PPID" >/dev/null 2>&1 ;;
+    bash|sh|dash|mksh|zsh|login|fish)
+      if [ "$(ps -o pgid= -p "$PPID" 2>/dev/null | tr -d ' ')" = "$PPID" ]; then
+        kill -INT -"$PPID" >/dev/null 2>&1
+      fi
+      kill -9 "$PPID" >/dev/null 2>&1
+      ;;
   esac
   exit 0
 }
@@ -151,8 +162,8 @@ do_download() {
   og_name="$(basename "$og_dest")"
   rm -f "$tmp_dir"/* 2>/dev/null
   if [ -f "$og_dir/$og_name" ]; then
-    echo -e "\e[032m[✓] Fayl kəsildi (cut): $og_dir/$og_name\e[0m"
     scan_media "$og_dir/$og_name"
+    echo -e "\e[032m[✓] Fayl kəsildi (cut): $og_dir/$og_name\e[0m"
     return 0
   fi
   echo -e "\e[031m[!] Xəta: fayl DownloaderOG klasörünə yazıla bilmədi.\e[0m"
@@ -221,7 +232,7 @@ check_requirements
 if [[ "$url" == *"shorts"* ]]; then
   echo -e "\e[036m Short aşkarlandı — avtomatik yüklənir...\e[0m"
   if do_download -f 'bestvideo*+bestaudio/best' --merge-output-format mp4; then
-    exit_termux
+    auto_exit
   else
     wait_and_keep_open
   fi
@@ -250,7 +261,7 @@ case "$platform" in
   instagram|tiktok|facebook|x)
     echo -e "\e[036m Platforma: ${platform^^} — avtomatik ən yüksək keyfiyyət yüklənir...\e[0m"
     if auto_download; then
-      exit_termux
+      auto_exit
     else
       show_error_hint "$platform"
       wait_and_keep_open
@@ -330,7 +341,7 @@ show_about() {
   echo -e "\e[036m yükləyicisidir. Instagram, TikTok, Facebook və X/Twitter linkləri"
   echo -e "\e[036m avtomatik, ən yüksək keyfiyyətdə yüklənir. YouTube və digər"
   echo -e "\e[036m platformalarda yalnız real mövcud keyfiyyətlər göstərilir."
-  echo -e "\e[036m Fayllar cut (kəsmə) ilə /storage/emulated/0/Download/DownloaderOG"
+  echo -e "\e[036m Fayllar cut (kəsmə) ilə /storage/emulated/0/DownloaderOG"
   echo -e "\e[036m klasörünə keçirilir və MediaStore-a qeydiyyata alınır. Uğurlu yükləmədən"
   echo -e "\e[036m sonra Termux avtomatik bağlanır.\e[0m"
   echo -e "\e[0m"
@@ -353,12 +364,12 @@ while true; do
     *)
       if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "$total" ]; then
         if [ "$has_fallback" -eq 1 ] && [ "$choice" -eq 1 ]; then
-          do_download -f 'bestvideo*+bestaudio/best' --merge-output-format mp4 && exit_termux
+          do_download -f 'bestvideo*+bestaudio/best' --merge-output-format mp4 && auto_exit
         elif [ "$choice" -le "${#heights[@]}" ]; then
           h="${heights[$((choice-1))]}"
-          do_download -f "bestvideo[height<=$h]+bestaudio/best[height<=$h]/best" --merge-output-format mp4 && exit_termux
+          do_download -f "bestvideo[height<=$h]+bestaudio/best[height<=$h]/best" --merge-output-format mp4 && auto_exit
         else
-          do_download -x --audio-format mp3 --audio-quality 5 --embed-metadata -f 'bestaudio[ext=m4a]/bestaudio/best' && exit_termux
+          do_download -x --audio-format mp3 --audio-quality 5 --embed-metadata -f 'bestaudio[ext=m4a]/bestaudio/best' && auto_exit
         fi
       else
         echo -e "\e[031m[!] Xəta: düzgün seçim daxil edin (1-$total, A və ya Q).\e[0m"
