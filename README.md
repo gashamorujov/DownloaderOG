@@ -37,8 +37,10 @@ platformanın dəstəyi avtomatik yenilənir və yükləmə sürəti maksimumdur
 - Orijinal video başlığı ilə fayl adlandırma (`%(title)s.%(ext)s`,
   Unicode/Azərbaycan dili dəstəyi)
 - Eyni adlı fayl mövcuddursa üzərinə yazılmır — avtomatik `(1)`, `(2)` əlavə olunur
-- Yükləmə temp qovluqda aparılır, bitdikdə **cut (mv)** ilə birbaşa
-  `/storage/emulated/0/Download` klasörünə keçirilir — əlavə yer tutmur
+- Yükləmə temp qovluqda aparılır, bitdikdə **cut (mv)** ilə əvvəlcə
+  `/storage/emulated/0/Download`-ə, emal bitdikdən sonra isə
+  `/storage/emulated/0/Download/DownloaderOG` klasörünə keçirilir —
+  kopya yaradılmır, əlavə yer tutmur
 - Fayllar **MediaStore/MediaScanner** (`termux-media-scan`) ilə sistemə
   qeydiyyata alınır — şəkillər Qalereyada, MP3/audio fayllar musiqi
   pleyerlərində avtomatik görünür
@@ -172,29 +174,35 @@ mexanizminin ən real və stabil həllidir.
 
 ## 9. Faylların harada saxlanıldığı
 
-Bütün yüklənmiş fayllar:
+Bütün yüklənmiş faylların **son yeri**:
 
 ```text
-/storage/emulated/0/Download
+/storage/emulated/0/Download/DownloaderOG
 ```
 
-qovluğunda saxlanılır (Fallback: `~/storage/shared/Download`). Fayl adları
+qovluğudur (Fallback: `~/storage/shared/Download/DownloaderOG`). Proses:
+
+1. Yükləmə müvəqqəti qovluqda (`~/.cache/downloaderog`) aparılır
+2. Bitdikdə fayl **cut (mv)** ilə əvvəlcə `/storage/emulated/0/Download`-ə
+   keçirilir
+3. Emal tamamlandıqdan sonra yenidən **cut (mv)** ilə
+   `/storage/emulated/0/Download/DownloaderOG` klasörünə köçürülür
+
+Kopya yaradılmır — yalnız move/cut edilir, ona görə ilkin `Download`
+qovluğunda ikinci nüsxə qalmaz və müvəqqəti qovluq boşalır. Fayl adları
 video/musiqinin orijinal başlığına uyğun olur, məsələn:
-`GASHAM - Example Video 2026.mp4`.
+`GASHAM - Example Video 2026.mp4`. Eyni adlı fayl varsa `(1)`, `(2)` əlavə
+olunur və əvvəlki fayl silinmir.
 
 Yükləndikdən sonra fayl avtomatik olaraq MediaScanner vasitəsilə Android
 MediaStore-a qeydiyyata alınır — MP4 **Qalereyada**, MP3 (`.mp3` /
 `audio/mpeg`, ID3 metadata ilə) **musiqi pleyerlərində** görünür (yalnız fayl
-meneceri deyil). Qeydiyyat tamamlandıqdan sonra Termux bağlanır.
-
-Yükləmə əvvəlcə müvəqqəti qovluqda (`~/.cache/downloaderog`) aparılır;
-yükləmə tamamlandıqda fayl **cut (mv)** əmri ilə hədəf klasörə keçirilir və
-müvəqqəti qovluq avtomatik **tamamilə təmizlənir** — nə temp, nə də əlavə
-kopya qalır. Telefonda yalnız hədəf fayl qalır:
-`/storage/emulated/0/Download/FaylAdi.mp3` (və ya `.mp4`).
+meneceri deyil). Qeydiyyat tamamlandıqdan sonra yaşıl `[✓]` mesajı göstərilir
+və Termux avtomatik bağlanır.
 
 Yükləmə klasörünü dəyişmək üçün `~/.termux/termux-url-opener` faylının
-əvvəlindəki `final_dir` dəyərini redaktə edin:
+əvvəlindəki `final_dir` dəyərini redaktə edin (DownloaderOG alt-qovluğu
+avtomatik `final_dir/DownloaderOG` olur):
 
 ```bash
 final_dir='/storage/emulated/0/Music'

@@ -6,6 +6,7 @@
 
 # SETTINGS (istədiyiniz kimi dəyişə bilərsiniz)--------------
 final_dir='/storage/emulated/0/Download'
+og_dir="$final_dir/DownloaderOG"
 tmp_dir="$HOME/.cache/downloaderog"
 # Instagram/TikTok üçün (məcburi deyil): brauzerdə login olub cookies.txt
 # yaradın və ~/.config/downloaderog/cookies.txt ünvanına kopyalayın.
@@ -121,7 +122,7 @@ move_unique() {
 }
 
 do_download() {
-  mkdir -p "$tmp_dir" "$final_dir"
+  mkdir -p "$tmp_dir" "$final_dir" "$og_dir"
   rm -f "$tmp_dir"/* 2>/dev/null
   yt-dlp "${dl_flags[@]}" "${js_flags[@]}" "$@" -o "$tmp_dir/%(title)s.%(ext)s" "$url"
   status=$?
@@ -141,13 +142,20 @@ do_download() {
     echo -e "\e[031m[!] Xəta: fayl tapılmadı — yükləmə tamamlanmadı.\e[0m"
     return 1
   fi
-  if [ -f "$final_dir/$moved" ]; then
-    rm -f "$tmp_dir"/* 2>/dev/null
-    echo -e "\e[032m[✓] Fayl kəsildi (cut): $final_dir/$moved\e[0m"
-    scan_media "$final_dir/$moved"
+  if [ ! -f "$final_dir/$moved" ]; then
+    echo -e "\e[031m[!] Xəta: fayl Download klasörünə yazıla bilmədi.\e[0m"
+    return 1
+  fi
+  # Emal bitdi → Download → DownloaderOG (cut/move, kopya yoxdur)
+  og_dest="$(move_unique "$final_dir/$moved" "$og_dir")"
+  og_name="$(basename "$og_dest")"
+  rm -f "$tmp_dir"/* 2>/dev/null
+  if [ -f "$og_dir/$og_name" ]; then
+    echo -e "\e[032m[✓] Fayl kəsildi (cut): $og_dir/$og_name\e[0m"
+    scan_media "$og_dir/$og_name"
     return 0
   fi
-  echo -e "\e[031m[!] Xəta: fayl hədəf klasörə yazıla bilmədi.\e[0m"
+  echo -e "\e[031m[!] Xəta: fayl DownloaderOG klasörünə yazıla bilmədi.\e[0m"
   return 1
 }
 
@@ -322,8 +330,8 @@ show_about() {
   echo -e "\e[036m yükləyicisidir. Instagram, TikTok, Facebook və X/Twitter linkləri"
   echo -e "\e[036m avtomatik, ən yüksək keyfiyyətdə yüklənir. YouTube və digər"
   echo -e "\e[036m platformalarda yalnız real mövcud keyfiyyətlər göstərilir."
-  echo -e "\e[036m Fayllar cut (kəsmə) ilə /storage/emulated/0/Download klasörünə"
-  echo -e "\e[036m keçirilir və MediaStore-a qeydiyyata alınır. Uğurlu yükləmədən"
+  echo -e "\e[036m Fayllar cut (kəsmə) ilə /storage/emulated/0/Download/DownloaderOG"
+  echo -e "\e[036m klasörünə keçirilir və MediaStore-a qeydiyyata alınır. Uğurlu yükləmədən"
   echo -e "\e[036m sonra Termux avtomatik bağlanır.\e[0m"
   echo -e "\e[0m"
 }
