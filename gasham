@@ -2,4 +2,26 @@
 # GASHAM — DownloaderOG interaktiv başlatma
 # Termux-da "gasham" yazıb Enter etdikdə işə düşür:
 # banner → "Link göndərin:" → linki yapışdırın → avtomatik emal
-exec bash "$HOME/.termux/termux-url-opener" --interactive
+#
+# Bu launcher install.sh tərəfindən həm $PREFIX/bin/gasham (həmişə PATH-də),
+# həm də ~/bin/gasham kimi quraşdırılır. Layihənin əsas skripti (termux-url-opener)
+# absolute path ilə aşağıdakı sırada axtarılır:
+
+main_script=""
+for candidate in \
+  "$HOME/.termux/termux-url-opener" \
+  "$HOME/bin/termux-url-opener" \
+  "$(dirname "$(readlink -f "$0")")/termux-url-opener"; do
+  if [ -f "$candidate" ]; then
+    main_script="$candidate"
+    break
+  fi
+done
+
+if [ -z "$main_script" ]; then
+  echo -e "\e[031m[!] DownloaderOG tapılmadı. Əvvəlcə quraşdırın:\e[0m"
+  echo -e "\e[033m    cd ~/DownloaderOG && bash install.sh\e[0m"
+  exit 1
+fi
+
+exec bash "$main_script" --interactive

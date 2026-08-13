@@ -171,6 +171,11 @@ bash ~/.termux/termux-url-opener "https://www.youtube.com/watch?v=..."
 gasham
 ```
 
+`gasham` komandası quraşdırma zamanı həm `$PREFIX/bin/gasham` (hər açılışda
+PATH-dədir), həm də `~/bin/gasham` ünvanına kopyalanır; `~/.bashrc` və
+`~/.profile`-ə PATH tənzimləməsi yazılır. Termux bağlanıb yenidən açılsa da
+komanda eyni şəkildə işləyir.
+
 Banner göstərilir, altında **"Link göndərin:"** yazılır — linki yapışdırıb
 Enter basın. Sayt linki (məs. video siyahısı olan səhifə) göndərsəniz,
 səhifədəki bütün videolar avtomatik aşkarlanıb nömrəli siyahı kimi

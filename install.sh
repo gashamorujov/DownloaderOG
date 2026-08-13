@@ -4,6 +4,7 @@
 # İşləmə məntiqi: Termux-YTD2.0 üslubu
 
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
+PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
 
 echo -e "\e[035m[*] Paketlər yenilənir...\e[0m"
 apt update -y && apt upgrade -y
@@ -71,10 +72,39 @@ fi
 cp "$SCRIPT_DIR/gasham" "$HOME/bin/gasham"
 chmod +x "$HOME/bin/gasham"
 
+echo -e "\e[032m[*] 'gasham' sistemsel komanda kimi qurulur ($PREFIX/bin/gasham)...\e[0m"
+mkdir -p "$PREFIX/bin"
+if cp "$SCRIPT_DIR/gasham" "$PREFIX/bin/gasham" 2>/dev/null; then
+  chmod +x "$PREFIX/bin/gasham"
+  echo -e "\e[032m[*] gasham: $PREFIX/bin/gasham (hər açılışda PATH-dədir)\e[0m"
+else
+  echo -e "\e[033m[!] $PREFIX/bin yazıla bilmədi — gasham yalnız ~/bin-də işləyəcək.\e[0m"
+fi
+
+echo -e "\e[032m[*] PATH tənzimləməsi (~/.bashrc, ~/.profile — gasham üçün)...\e[0m"
+path_block='
+# GASHAM DownloaderOG — gasham əmri üçün PATH
+case ":$PATH:" in
+  *":$HOME/bin:"*) ;;
+  *) export PATH="$HOME/bin:$PATH" ;;
+esac'
+for rc in "$HOME/.bashrc" "$HOME/.profile"; do
+  if [ -f "$rc" ] && grep -q "GASHAM DownloaderOG" "$rc" 2>/dev/null; then
+    continue
+  fi
+  printf '%s\n' "$path_block" >> "$rc"
+done
+# Cari sessiyada da dərhal işləsin
+case ":$PATH:" in
+  *":$HOME/bin:"*) ;;
+  *) export PATH="$HOME/bin:$PATH" ;;
+esac
+
 echo -e "\e[032m"
 echo -e "\e[032m[*] Quraşdırma tamamlandı! ✅\e[0m"
 echo -e "\e[032m[*] İstifadə: videonu paylaşın → Termux seçin → keyfiyyəti seçin\e[0m"
-echo -e "\e[032m[*] İnteraktiv: Termux-da 'gasham' yazıb Enter edin → 'Link göndərin:'\e[0m"
+echo -e "\e[032m[*] İnteraktiv: 'gasham' yazıb Enter edin → banner + 'Link göndərin:'\e[0m"
+echo -e "\e[032m[*] gasham komandası $PREFIX/bin-dədir — Termux yenidən açılsa da işləyir\e[0m"
 echo -e "\e[032m[*] Sayt linki göndərsəniz səhifədəki bütün videolar siyahı kimi göstərilir\e[0m"
 echo -e "\e[032m[*] Fayllar: Download → /storage/emulated/0/DownloaderOG (cut/move)\e[0m"
 echo -e "\e[033m[!] YouTube Shorts paylaşsanız, avtomatik yüklənir (menyu göstərilmir).\e[0m"
