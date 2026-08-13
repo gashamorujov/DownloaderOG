@@ -3,6 +3,7 @@
 # GASHAM DOWNLOADEROG
 # Termux üçün universal media yükləyici
 # Paylaş → avtomatik platforma aşkarlama → yükləmə → MediaStore → Termux bağlanması
+# "gasham" əmri → interaktiv rejim: banner + "Link göndərin:" + sayt videolarının siyahısı
 
 # SETTINGS (istədiyiniz kimi dəyişə bilərsiniz)--------------
 final_dir='/storage/emulated/0/Download'
@@ -13,6 +14,22 @@ tmp_dir="$HOME/.cache/downloaderog"
 cookies_file="$HOME/.config/downloaderog/cookies.txt"
 # -----------------------------------------------------------
 
+# "gasham" əmri ilə interaktiv başlatma (Termux-da əl ilə işə salma)
+og_interactive=0
+
+show_banner() {
+  echo -e "\e[32m"
+  echo " ██████╗  █████╗ ███████╗██╗  ██╗ █████╗ ███╗   ███╗"
+  echo "██╔════╝ ██╔══██╗██╔════╝██║  ██║██╔══██╗████╗ ████║"
+  echo "██║  ███╗███████║███████╗███████║███████║██╔████╔██║"
+  echo "██║   ██║██╔══██║╚════██║██╔══██║██╔══██║██║╚██╔╝██║"
+  echo "╚██████╔╝██║  ██║███████║██║  ██║██║  ██║██║ ╚═╝ ██║"
+  echo " ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝"
+  echo -e "\e[0m"
+  echo -e "\e[36;1m THE LIFE IS NOT FAIR, YOU SHOULD NOT BE A FAIR"
+  echo -e "\e[0m"
+}
+
 # Ümumi yükləmə bayraqları — platforma dəyişikliklərinə davamlılıq üçün
 dl_flags=(
   --retries 10
@@ -20,7 +37,7 @@ dl_flags=(
   --extractor-retries 5
   --socket-timeout 30
   --continue
-  --concurrent-fragments 8
+  --concurrent-fragments 16
   --force-ipv4
   --remote-components ejs:github
 )
@@ -196,17 +213,35 @@ check_requirements() {
 
 meta_info() {
   mkdir -p "$tmp_dir"
-  yt-dlp "${dl_flags[@]}" "${js_flags[@]}" --skip-download -j "$url" 2>"$tmp_dir/.meta_err" | python3 -c '
+  yt-dlp "${dl_flags[@]}" "${js_flags[@]}" "$@" --skip-download -j "$url" 2>"$tmp_dir/.meta_err" | python3 -c '
 import json, sys
 try:
     d = json.load(sys.stdin)
 except Exception:
     sys.exit(1)
 title = (d.get("title") or "Bilinməyən başlıq").replace("\n", " ").replace("\t", " ")
-heights = sorted({f.get("height") for f in d.get("formats") or []
+formats = d.get("formats") or []
+dur = d.get("duration") or 0
+heights = sorted({f.get("height") for f in formats
                   if f.get("height") and (f.get("vcodec") or "") != "none"})
+auds = [f.get("abr") or f.get("tbr") or 0 for f in formats
+        if (f.get("vcodec") or "") in ("none", "") and f.get("acodec") not in (None, "none")]
+best_abr = max(auds) if auds else 0
+sizes = []
+for h in heights:
+    vs = [f.get("vbr") or f.get("tbr") or 0 for f in formats
+          if f.get("height") == h and (f.get("vcodec") or "") != "none"]
+    vbr = max(vs) if vs else 0
+    mb = (vbr + best_abr) * dur / 8192.0 if dur else 0
+    if mb >= 10:
+        sizes.append(str(int(round(mb))))
+    elif mb > 0:
+        sizes.append("%.1f" % mb)
+    else:
+        sizes.append("")
 print(title)
 print(",".join(str(h) for h in heights))
+print(",".join(sizes))
 '
 }
 
@@ -216,8 +251,16 @@ wait_and_keep_open() {
   exit 0
 }
 
+if [ "$1" = "--interactive" ]; then
+  og_interactive=1
+  shift
+fi
 url="$1"
-if [[ -z "$url" ]]; then
+if [ "$og_interactive" -eq 1 ]; then
+  show_banner
+  printf "\e[036m Link göndərin: \e[0m"
+  read -r url
+elif [[ -z "$url" ]]; then
   printf "\e[033m Video/audio linkini daxil edin: \e[0m"
   read -r url
 fi
@@ -268,8 +311,41 @@ case "$platform" in
     ;;
 esac
 
+# === Sayt linkləri ("other") — səhifədəki bütün videoları aşkarla ===
+pl_args=()
+if [ "$platform" = "other" ] && ! printf '%s' "$url" | grep -qiE '\.(mp4|webm|mkv|avi|mov|m4v|flv|ts|m3u8|mp3|m4a)([?#].*)?$'; then
+  pl_out="$(yt-dlp "${dl_flags[@]}" "${js_flags[@]}" --flat-playlist --no-warnings -J "$url" 2>/dev/null | python3 -c '
+import json, sys
+try:
+    d = json.load(sys.stdin)
+except Exception:
+    sys.exit(0)
+es = d.get("entries")
+if not isinstance(es, list) or len(es) < 2:
+    sys.exit(0)
+print("COUNT %d" % len(es))
+for i, e in enumerate(es, 1):
+    t = e.get("title") or e.get("id") or ("Video %d" % i)
+    print("%d\t%s" % (i, str(t).replace("\n", " ").replace("\t", " ")))
+')"
+  pl_count="$(printf '%s\n' "$pl_out" | awk '/^COUNT / {print $2}')"
+  if [ -n "$pl_count" ] && [ "$pl_count" -ge 2 ]; then
+    echo -e "\e[036m Səhifədə $pl_count video aşkarlandı — birini seçin:\e[0m"
+    printf '%s\n' "$pl_out" | awk -F'\t' -v c="\033[032m" -v r="\033[0m" '!/^COUNT / {printf "%s%2d. %s%s\n", c, $1, $2, r}'
+    printf "\e[032m Seçim (1-$pl_count): \e[0m"
+    read -r pl_sel
+    if [[ "$pl_sel" =~ ^[0-9]+$ ]] && [ "$pl_sel" -ge 1 ] && [ "$pl_sel" -le "$pl_count" ]; then
+      pl_args=(--playlist-items "$pl_sel")
+      echo -e "\e[036m Seçilən video: #$pl_sel — keyfiyyətlər yoxlanılır...\e[0m"
+    else
+      echo -e "\e[033m[!] Yanlış seçim — 1-ci video seçilir.\e[0m"
+      pl_args=(--playlist-items 1)
+    fi
+  fi
+fi
+
 # YouTube və digər platformalar — dinamik real keyfiyyət siyahısı
-meta="$(meta_info)"
+meta="$(meta_info "${pl_args[@]}")"
 if [ -z "$meta" ]; then
   echo -e "\e[031m[!] Xəta: Bu linkdən media məlumatı alına bilmədi — link düzgün deyil, silinib,\e[0m"
   echo -e "\e[031m    privatdır və ya platforma giriş (login) tələb edir.\e[0m"
@@ -286,7 +362,9 @@ rm -f "$tmp_dir/.meta_err"
 title="$(printf '%s\n' "$meta" | sed -n '1p')"
 [ -z "$title" ] && title="Bilinməyən başlıq"
 heights_csv="$(printf '%s\n' "$meta" | sed -n '2p')"
+sizes_csv="$(printf '%s\n' "$meta" | sed -n '3p')"
 IFS=',' read -r -a heights <<< "$heights_csv"
+IFS=',' read -r -a sizes <<< "$sizes_csv"
 if [ "${#heights[@]}" -eq 0 ]; then
   # Direkt fayl/məlumat yoxdursa (məs. birbaşa .mp4 linki) — "ən yaxşı MP4" seçimi
   has_fallback=1
@@ -296,19 +374,6 @@ else
   mp3_num=$(( ${#heights[@]} + 1 ))
 fi
 total="$mp3_num"
-
-show_banner() {
-  echo -e "\e[32m"
-  echo " ██████╗  █████╗ ███████╗██╗  ██╗ █████╗ ███╗   ███╗"
-  echo "██╔════╝ ██╔══██╗██╔════╝██║  ██║██╔══██╗████╗ ████║"
-  echo "██║  ███╗███████║███████╗███████║███████║██╔████╔██║"
-  echo "██║   ██║██╔══██║╚════██║██╔══██║██╔══██║██║╚██╔╝██║"
-  echo "╚██████╔╝██║  ██║███████║██║  ██║██║  ██║██║ ╚═╝ ██║"
-  echo " ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝"
-  echo -e "\e[0m"
-  echo -e "\e[36;1m THE LIFE IS NOT FAIR, YOU SHOULD NOT BE A FAIR"
-  echo -e "\e[0m"
-}
 
 show_menu() {
   echo -e "\e[036m╔════════════════════════════════════════════════════════════╗"
@@ -324,7 +389,12 @@ show_menu() {
   else
     for h in "${heights[@]}"; do
       num=$((num+1))
-      echo -e "\e[032m   $num. ${h}p"
+      sz="${sizes[$((num-1))]}"
+      if [ -n "$sz" ]; then
+        echo -e "\e[032m   $num. ${h}p — ${sz} MB"
+      else
+        echo -e "\e[032m   $num. ${h}p"
+      fi
     done
   fi
   echo -e "\e[036m MP3"
@@ -338,8 +408,9 @@ show_about() {
   echo -e "\e[036m DownloaderOG — telefonla Share (Paylaş) düyməsi ilə istənilən"
   echo -e "\e[036m videonu/musiqini Termux vasitəsilə yükləyən universal media"
   echo -e "\e[036m yükləyicisidir. Instagram, TikTok, Facebook və X/Twitter linkləri"
-  echo -e "\e[036m avtomatik, ən yüksək keyfiyyətdə yüklənir. YouTube və digər"
-  echo -e "\e[036m platformalarda yalnız real mövcud keyfiyyətlər göstərilir."
+  echo -e "\e[036m avtomatik, ən yüksək keyfiyyətdə yüklənir. Sayt səhifələrindəki"
+  echo -e "\e[036m bütün videolar aşkarlanır. YouTube və digər platformalarda yalnız"
+  echo -e "\e[036m real mövcud keyfiyyətlər və təxmini ölçü (MB) göstərilir."
   echo -e "\e[036m Fayllar cut (kəsmə) ilə /storage/emulated/0/DownloaderOG"
   echo -e "\e[036m klasörünə keçirilir və MediaStore-a qeydiyyata alınır. Uğurlu yükləmədən"
   echo -e "\e[036m sonra Termux avtomatik bağlanır.\e[0m"
@@ -347,9 +418,9 @@ show_about() {
 }
 
 while true; do
-  show_banner
+  [ "$og_interactive" -eq 1 ] || show_banner
   show_menu
-  read choice
+  read choice || exit 0
 
   case "$choice" in
     A|a)
@@ -363,12 +434,12 @@ while true; do
     *)
       if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "$total" ]; then
         if [ "$has_fallback" -eq 1 ] && [ "$choice" -eq 1 ]; then
-          do_download -f 'bestvideo*+bestaudio/best' --merge-output-format mp4 && auto_exit
+          do_download -f 'bestvideo*+bestaudio/best' --merge-output-format mp4 "${pl_args[@]}" && auto_exit
         elif [ "$choice" -le "${#heights[@]}" ]; then
           h="${heights[$((choice-1))]}"
-          do_download -f "bestvideo[height<=$h]+bestaudio/best[height<=$h]/best" --merge-output-format mp4 && auto_exit
+          do_download -f "bestvideo[height<=$h]+bestaudio/best[height<=$h]/best" --merge-output-format mp4 "${pl_args[@]}" && auto_exit
         else
-          do_download -x --audio-format mp3 --audio-quality 5 --embed-metadata -f 'bestaudio[ext=m4a]/bestaudio/best' && auto_exit
+          do_download -x --audio-format mp3 --audio-quality 5 --embed-metadata -f 'bestaudio[ext=m4a]/bestaudio/best' "${pl_args[@]}" && auto_exit
         fi
       else
         echo -e "\e[031m[!] Xəta: düzgün seçim daxil edin (1-$total, A və ya Q).\e[0m"

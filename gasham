@@ -1,0 +1,5 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# GASHAM — DownloaderOG interaktiv başlatma
+# Termux-da "gasham" yazıb Enter etdikdə işə düşür:
+# banner → "Link göndərin:" → linki yapışdırın → avtomatik emal
+exec bash "$HOME/.termux/termux-url-opener" --interactive

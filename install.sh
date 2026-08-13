@@ -63,9 +63,19 @@ fi
 cp "$SCRIPT_DIR/termux-url-opener" "$HOME/.termux/termux-url-opener"
 chmod +x "$HOME/.termux/termux-url-opener"
 
+echo -e "\e[032m[*] 'gasham' əmri quraşdırılır (~/bin/gasham, interaktiv rejim)...\e[0m"
+if [ -f "$HOME/bin/gasham" ]; then
+  cp "$HOME/bin/gasham" "$HOME/bin/gasham.bak"
+  echo -e "\e[033m[!] Köhnə ~/bin/gasham backup edildi: gasham.bak\e[0m"
+fi
+cp "$SCRIPT_DIR/gasham" "$HOME/bin/gasham"
+chmod +x "$HOME/bin/gasham"
+
 echo -e "\e[032m"
 echo -e "\e[032m[*] Quraşdırma tamamlandı! ✅\e[0m"
 echo -e "\e[032m[*] İstifadə: videonu paylaşın → Termux seçin → keyfiyyəti seçin\e[0m"
+echo -e "\e[032m[*] İnteraktiv: Termux-da 'gasham' yazıb Enter edin → 'Link göndərin:'\e[0m"
+echo -e "\e[032m[*] Sayt linki göndərsəniz səhifədəki bütün videolar siyahı kimi göstərilir\e[0m"
 echo -e "\e[032m[*] Fayllar: Download → /storage/emulated/0/DownloaderOG (cut/move)\e[0m"
 echo -e "\e[033m[!] YouTube Shorts paylaşsanız, avtomatik yüklənir (menyu göstərilmir).\e[0m"
 echo -e "\e[033m[!] Instagram/TikTok xəta verirsə: brauzerdə login olun, cookies.txt yaradın\e[0m"

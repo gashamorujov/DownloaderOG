@@ -20,6 +20,10 @@ sistem linki avtomatik tanıyır:
 - **YouTube / digər platformalar** — yalnız videoda real mövcud olan
   keyfiyyətlər göstərilir, istədiyinizi seçirsiniz (MP3 seçimi də var)
 - **YouTube Shorts** — menyu göstərilmədən avtomatik yüklənir
+- **İnteraktiv rejim** — Termux-da `gasham` yazıb Enter etdikdə banner və
+  **"Link göndərin:"** görünür, linki yapışdırıb Enter basırsınız
+- **Sayt linkləri** — səhifədəki bütün yüklənə bilən videolar avtomatik
+  aşkarlanır və nömrəli siyahı kimi təqdim olunur
 
 Yükləmə mühərriki olaraq **yt-dlp** istifadə olunur — ona görə yüzlərlə
 platformanın dəstəyi avtomatik yenilənir və yükləmə sürəti maksimumdur.
@@ -27,10 +31,15 @@ platformanın dəstəyi avtomatik yenilənir və yükləmə sürəti maksimumdur
 ## 2. Əsas xüsusiyyətlər
 
 - Share → Termux ilə avtomatik link qəbulu
+- `gasham` əmri ilə interaktiv işə salma — banner + "Link göndərin:"
 - Avtomatik platforma aşkarlama (Instagram/TikTok/Facebook/X → menyusuz,
   ən yüksək keyfiyyət; YouTube/digər → dinamik keyfiyyət siyahısı)
 - Dinamik keyfiyyət sistemi — yalnız mənbədə real mövcud keyfiyyətlər
   göstərilir (sabit siyahı yoxdur)
+- Sayt səhifələrindəki bütün videoların avtomatik aşkarlanması və nömrəli
+  siyahı ilə seçim (məs. `1. Video 1`, `2. Video 2`, ...)
+- Hər keyfiyyətin qarşısında təxmini fayl ölçüsü (MB) göstərilir
+  (məs. `720p — 450 MB`) — bitrate + müddət əsasında hesablanır
 - YouTube Shorts üçün bir kliklə avtomatik yükləmə
 - YouTube və digər platformalarda **MP3 yüklə** seçimi
 - Canlı yükləmə prosesi (yt-dlp progress bar)
@@ -127,10 +136,10 @@ Telefonda istənilən videonu/musiqini açın:
 
 ```text
 MP4
-  1. 144p
-  2. 360p
-  3. 720p
-  4. 1080p
+  1. 144p — 12 MB
+  2. 360p — 120 MB
+  3. 720p — 450 MB
+  4. 1080p — 850 MB
 MP3
   5. MP3 yüklə
 ╠═▶ A. About
@@ -142,10 +151,10 @@ MP3
 Yuxarıdakı siyahı nümunədir — sistem yalnız həmin videoda həqiqətən mövcud
 olan keyfiyyətləri göstərir. Birbaşa fayl linklərində (məs. `.mp4`) keyfiyyət
 siyahısı olmadığı üçün **"1. Ən yaxşı keyfiyyət (MP4)"** seçimi göstərilir.
-Yükləmə **uğurla** başa çatdıqda proqram bir neçə saniyə mesajı göstərir,
-faylın yaddaşa yazıldığını yoxlayır, media qeydiyyatını tamamlayır və
-Termux-un rəsmi `com.termux.service_stop` aksiyası ilə proqramı tamamilə
-bağlayır — istifadəçi heç bir düyməyə (Enter, Ctrl+Z, exit) toxunmur.
+Yükləmə **uğurla** başa çatdıqda yaşıl `[✓]` mesajı göstərilir və dərhal
+ardınca Ctrl+C + Enter ekvivalenti avtomatik icra olunur: Termux-un rəsmi
+`com.termux.service_stop` aksiyası ilə proqram tamamilə bağlanır —
+istifadəçi heç bir düyməyə (Enter, Ctrl+Z, exit) toxunmur, heç bir
 əməliyyat tələb olunmur. Yükləmə xəta ilə bitsə, Termux bağlanmır — menyuya
 qayıdılır və yenidən cəhd etmək mümkündür.
 
@@ -155,6 +164,27 @@ qayıdılır və yenidən cəhd etmək mümkündür.
 bash ~/bin/termux-url-opener "https://www.youtube.com/watch?v=..."
 bash ~/.termux/termux-url-opener "https://www.youtube.com/watch?v=..."
 ```
+
+İnteraktiv rejim — Termux açıq olduqda:
+
+```bash
+gasham
+```
+
+Banner göstərilir, altında **"Link göndərin:"** yazılır — linki yapışdırıb
+Enter basın. Sayt linki (məs. video siyahısı olan səhifə) göndərsəniz,
+səhifədəki bütün videolar avtomatik aşkarlanıb nömrəli siyahı kimi
+göstərilir:
+
+```text
+Səhifədə 3 video aşkarlandı — birini seçin:
+ 1. Video 1
+ 2. Video 2
+ 3. Video 3
+Seçim (1-3):
+```
+
+Seçilən video üçün real keyfiyyətlər və təxmini ölçülər (MB) göstərilir.
 
 ## 8. Share sisteminin qurulması
 
