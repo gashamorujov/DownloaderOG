@@ -81,18 +81,40 @@ else
   echo -e "\e[033m[!] $PREFIX/bin yazıla bilmədi — gasham yalnız ~/bin-də işləyəcək.\e[0m"
 fi
 
-echo -e "\e[032m[*] PATH tənzimləməsi (~/.bashrc, ~/.profile — gasham üçün)...\e[0m"
-path_block='
+echo -e "\e[032m[*] Shell tənzimləməsi (~/.bashrc, ~/.profile, ~/.bash_profile)...\e[0m"
+shell_block='
 # GASHAM DownloaderOG — gasham əmri üçün PATH
 case ":$PATH:" in
   *":$HOME/bin:"*) ;;
   *) export PATH="$HOME/bin:$PATH" ;;
-esac'
-for rc in "$HOME/.bashrc" "$HOME/.profile"; do
-  if [ -f "$rc" ] && grep -q "GASHAM DownloaderOG" "$rc" 2>/dev/null; then
+esac
+
+# "gasham" yazıb Enter edən kimi DownloaderOG avtomatik başlasın.
+# Komanda/executable tapılmasa belə bu funksiya işləyir (hər yeni sessiyada).
+gasham() {
+  local main=""
+  for p in \
+    "$HOME/.termux/termux-url-opener" \
+    "$HOME/bin/termux-url-opener" \
+    "$HOME/DownloaderOG/termux-url-opener" \
+    "/data/data/com.termux/files/usr/bin/termux-url-opener"; do
+    if [ -f "$p" ]; then
+      main="$p"
+      break
+    fi
+  done
+  if [ -z "$main" ]; then
+    echo -e "\e[031m[!] DownloaderOG tapılmadı. Əvvəlcə: bash install.sh\e[0m"
+    return 1
+  fi
+  bash "$main" --interactive
+}
+'
+for rc in "$HOME/.bashrc" "$HOME/.profile" "$HOME/.bash_profile"; do
+  if [ -f "$rc" ] && grep -q "^gasham()" "$rc" 2>/dev/null; then
     continue
   fi
-  printf '%s\n' "$path_block" >> "$rc"
+  printf '%s\n' "$shell_block" >> "$rc"
 done
 # Cari sessiyada da dərhal işləsin
 case ":$PATH:" in

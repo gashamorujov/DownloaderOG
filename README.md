@@ -172,8 +172,10 @@ gasham
 ```
 
 `gasham` komandası quraşdırma zamanı həm `$PREFIX/bin/gasham` (hər açılışda
-PATH-dədir), həm də `~/bin/gasham` ünvanına kopyalanır; `~/.bashrc` və
-`~/.profile`-ə PATH tənzimləməsi yazılır. Termux bağlanıb yenidən açılsa da
+PATH-dədir), həm də `~/bin/gasham` ünvanına kopyalanır. Əlavə təminat üçün
+`~/.bashrc`, `~/.profile` və `~/.bash_profile`-ə `gasham()` funksiyası da
+yazılır — executable heç nədən asılı olmayaraq, hər yeni Termux sessiyasında
+`gasham` + Enter DownloaderOG-u başladır. Termux bağlanıb yenidən açılsa da
 komanda eyni şəkildə işləyir.
 
 Banner göstərilir, altında **"Link göndərin:"** yazılır — linki yapışdırıb

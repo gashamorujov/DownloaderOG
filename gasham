@@ -7,10 +7,13 @@
 # həm də ~/bin/gasham kimi quraşdırılır. Layihənin əsas skripti (termux-url-opener)
 # absolute path ilə aşağıdakı sırada axtarılır:
 
+PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
 main_script=""
 for candidate in \
   "$HOME/.termux/termux-url-opener" \
   "$HOME/bin/termux-url-opener" \
+  "$HOME/DownloaderOG/termux-url-opener" \
+  "$PREFIX/bin/termux-url-opener" \
   "$(dirname "$(readlink -f "$0")")/termux-url-opener"; do
   if [ -f "$candidate" ]; then
     main_script="$candidate"
