@@ -219,6 +219,8 @@ try:
     d = json.load(sys.stdin)
 except Exception:
     sys.exit(1)
+if not isinstance(d, dict):
+    sys.exit(1)
 title = (d.get("title") or "Bilinməyən başlıq").replace("\n", " ").replace("\t", " ")
 formats = d.get("formats") or []
 dur = d.get("duration") or 0
